@@ -1,0 +1,10 @@
+/.next/
+/node_modules/
+/out/
+/build/
+/coverage/
+*.d.ts
+.next
+.next-env.d.ts
+*.mts
+*.config.*

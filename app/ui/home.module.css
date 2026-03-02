@@ -1,0 +1,9 @@
+/* CSS module to add a class named shape automatically to a specified componnent instead of using tailwind classes (the same action)*/
+/* it will add a black triangle to a homepage  */
+.shape {
+    height: 0;
+    width: 0;
+    border-bottom: 30px solid black;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+}
