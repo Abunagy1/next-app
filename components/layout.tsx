@@ -1,6 +1,8 @@
 // Layout component  will be shared across all pages and reshape the layout for your site main page
+'use client';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useState } from 'react';
 import styles from './layout.module.css';
 import utilStyles from '../styles/utils.module.css';
 //import utilStyles from '@/styles/utils.module.css';
@@ -17,6 +19,7 @@ type LayoutProps = {
   backHref?: string; // new optional prop
   backLabel?: string; // new prop for custom link text
 };
+
 export const siteTitle = 'Next.js Daynamic Website';
 export function Alert({ children, type }) {
     return (
@@ -31,6 +34,8 @@ export function Alert({ children, type }) {
     );
 }
 export default function Layout({ children, home, backHref, backLabel = "Back to home" }: LayoutProps) {
+  const [error, setError] = useState(false);
+  const imageSrc = error ? '/default-avatar.png' : '/blog/blog.jpg';
   return (
     <div className={styles.container}>
       <Head>
@@ -52,7 +57,7 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
               className="rounded-full border-4 border-blue-500 shadow-lg"
               height={144}
               width={144}
-              alt=""
+              alt="Blog header"
             />
             <h1 className="mt-4 text-4xl font-bold text-gray-900 dark:text-white">
               {name}
@@ -67,7 +72,7 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
                 className="rounded-full border-2 border-blue-500"
                 height={48}
                 width={48}
-                alt=""
+                alt="Blog POST"
               />
               <span className="text-xl font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 {name}

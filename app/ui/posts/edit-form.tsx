@@ -7,7 +7,23 @@ import { ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { UploadButton } from '@uploadthing/react';
 import type { ourFileRouter } from '@/app/api/uploadthing/core';
 import Image from 'next/image';
-
+// const uploadButtonAppearance = {
+//   button: {
+//     background: 'transparent',
+//     border: '2px solid #3b82f6', // blue-500
+//     borderRadius: '0.5rem',
+//     padding: '0.5rem 1rem',
+//     color: '#3b82f6',
+//     fontWeight: '500',
+//     transition: 'all 0.2s',
+//     cursor: 'pointer',
+//     width: '100%',
+//   },
+//   allowedContent: {
+//     color: '#6b7280', // gray-500
+//     fontSize: '0.875rem',
+//   },
+// };
 export type UserField = {
   id: string;
   name: string;
@@ -133,6 +149,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
                     fontSize: '0.875rem',
                   },
                 }}
+                // appearance={uploadButtonAppearance}
               />
             </div>
           </div>
@@ -183,16 +200,15 @@ export default function EditPostForm({ post }: EditPostFormProps) {
         </div>
 
         {/* Delete Post Button */}
-        <form
-          action={async () => {
-            if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-              await deletePost(post.slug);
-            }
-          }}
-        >
+        <form action={deletePost.bind(null, post.slug)}>
           <button
             type="submit"
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+            onClick={(e) => {
+              if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                e.preventDefault();
+              }
+            }}
           >
             <TrashIcon className="w-4 h-4" />
             Delete Post

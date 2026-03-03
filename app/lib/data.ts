@@ -583,6 +583,46 @@ export async function fetchFilteredCustomers(query: string) {
 }
 
 
+
+export async function fetchFilteredPostsByUser(
+  userId: string,
+  query: string,
+  currentPage: number
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  try {
+    const posts = await sql<Post[]>`
+      SELECT slug, user_id, title, content, created_at, updated_at, images
+      FROM posts
+      WHERE user_id = ${userId} AND (title ILIKE ${`%${query}%`} OR content ILIKE ${`%${query}%`})
+      ORDER BY created_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+    return posts;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch posts.');
+  }
+}
+
+export async function fetchPostsPagesByUser(userId: string, query: string) {
+  try {
+    const data = await sql`
+      SELECT COUNT(*)
+      FROM posts
+      WHERE user_id = ${userId} AND (title ILIKE ${`%${query}%`} OR content ILIKE ${`%${query}%`})
+    `;
+    const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of posts.');
+  }
+}
+
+
+
+
 export async function fetchFilteredPosts(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {

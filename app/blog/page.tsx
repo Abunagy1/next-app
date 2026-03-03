@@ -17,7 +17,8 @@ export const metadata: Metadata = {
 export default async function BlogPage() {
   //const session = await auth();
   const session = await getServerSession(authOptions);
-  const posts = await getPosts(session?.user?.id);
+  //const posts = await getPosts(session?.user?.id);
+  const posts = await getPosts(); // no argument → fetches all posts
   return (
     <Layout home>
       <Head>
