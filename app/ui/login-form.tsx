@@ -1,20 +1,46 @@
 'use client';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { lusitana } from '@/app/ui/fonts';
 import { AtSymbolIcon, KeyIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-import { useActionState } from 'react';
-import { authenticate } from '@/app/lib/actions';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+      callbackUrl,
+    });
+
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      router.push(result?.url || callbackUrl);
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <h1 className={`${lusitana.className} text-2xl text-gray-900 dark:text-white text-center`}>
         Please log in
       </h1>
@@ -59,21 +85,21 @@ export default function LoginForm() {
         </div>
       </div>
       <input type="hidden" name="redirectTo" value={callbackUrl} />
-      <Button type="submit" className="w-full justify-center" aria-disabled={isPending}>
-        {isPending ? 'Logging in...' : 'Log in'} <ArrowRightIcon className="ml-2 h-5 w-5" />
+      <Button type="submit" className="w-full justify-center" disabled={loading}>
+        {loading ? 'Logging in...' : 'Log in'} <ArrowRightIcon className="ml-2 h-5 w-5" />
       </Button>
+      {error && (
+        <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+          <ExclamationCircleIcon className="h-5 w-5" />
+          <p>{error}</p>
+        </div>
+      )}
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">
         Don't have an account?{' '}
         <Link href="/register" className="text-blue-600 hover:underline dark:text-blue-400">
           Sign up
         </Link>
       </div>
-      {errorMessage && (
-        <div className="flex items-center gap-2 text-red-500 text-sm">
-          <ExclamationCircleIcon className="h-5 w-5" />
-          <p>{errorMessage}</p>
-        </div>
-      )}
     </form>
   );
 }

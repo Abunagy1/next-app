@@ -35,6 +35,7 @@ import Stripe from 'stripe';
 import { getUserCustomerIds } from './data';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
+import { signIn } from '@/auth'; // Import directly from your auth config
 // import { signIn, signOut, auth } from '@/auth'; // we'll sign them in after registration
 // import { AuthError } from 'next-auth';
 //import { sql } from '@vercel/postgres';
@@ -42,6 +43,10 @@ import { authOptions } from '@/auth';
 // ... existing imports and code
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import bcrypt from 'bcryptjs';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+import { Product } from './definitions';
+//import { type } from 'os';
 // ---------- Invoice Schemas ----------
 // const FormSchema = z.object({
 //   id: z.string(),
@@ -336,30 +341,30 @@ export async function createPaymentIntent(formData: FormData) {
   }
 }
 // ---------- Authentication ----------
-import { signIn } from '@/auth'; // Import directly from your auth config
 
-export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData
-) {
-  try {
-    await signIn('credentials', {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      redirectTo: '/dashboard',
-    });
-  } catch (error) {
-    // NextAuth.js v5 throws CredentialsSignin error directly
-    if (error instanceof Error) {
-      // Check for specific error types if needed
-      if (error.message.includes('CredentialsSignin')) {
-        return 'Invalid credentials.';
-      }
-      return error.message || 'Something went wrong.';
-    }
-    return 'Something went wrong.';
-  }
-}
+
+// export async function authenticate(
+//   prevState: string | undefined,
+//   formData: FormData
+// ) {
+//   try {
+//     await signIn('credentials', {
+//       email: formData.get('email') as string,
+//       password: formData.get('password') as string,
+//       redirectTo: '/dashboard',
+//     });
+//   } catch (error) {
+//     // NextAuth.js v5 throws CredentialsSignin error directly
+//     if (error instanceof Error) {
+//       // Check for specific error types if needed
+//       if (error.message.includes('CredentialsSignin')) {
+//         return 'Invalid credentials.';
+//       }
+//       return error.message || 'Something went wrong.';
+//     }
+//     return 'Something went wrong.';
+//   }
+// }
 //or if prefer to use the specific error classes, they are now exported from '@auth/core/errors'.
 //you should install if are going to usethis function --> npm install @auth/core
 // import { CredentialsSignin } from '@auth/core/errors';
@@ -840,12 +845,6 @@ export async function signOutAction() {
   await signOut({ redirectTo: '/' });
 }
 
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { Product } from './definitions';
-import { auth } from '@/auth';
-//import { type } from 'os';
-
 async function ensureProductsDir() {
   const dir = path.join(process.cwd(), 'public/products');
   try {
@@ -915,7 +914,8 @@ export async function updateProduct(formData: FormData) {
 }
 
 export async function deleteProduct(id: number) {
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') throw new Error('Unauthorized');
   await sql`DELETE FROM products WHERE id = ${id}`;
   revalidatePath('/store/edit');
