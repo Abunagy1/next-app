@@ -6,7 +6,9 @@ import Layout from '@/components/layout';
 import Date from '@/components/date';
 import utilStyles from '@/styles/utils.module.css';
 import Link from 'next/link';
-import { auth } from '@/auth';
+//import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { getAllPostIds, getPostData, getSortedPostsData } from '@/app/lib/posts';
 import { PencilIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 export const dynamic = 'force-dynamic';
@@ -33,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 export default async function Post({ params }: Props) {
   const { id } = await params;
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   const backLink = session ? '/dashboard' : '/';
   const backLabel = session ? 'Back to Dashboard' : 'Back to Home';
   const allPosts = await getSortedPostsData();

@@ -21,6 +21,9 @@ In /dashboard/invoices/page.tsx, import a new function called fetchInvoicesPages
 import { fetchInvoicesPages } from '@/app/lib/data';
 // app/dashboard/invoices/page.tsx
 import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
+
 /* 
 <Search/> allows users to search for specific invoices.
 <Pagination/> allows users to navigate between pages of invoices.
@@ -51,7 +54,8 @@ export default async function Page(props: {
     page?: string;
   }>;
 }) {
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'admin';
   const userId = session?.user?.id;
   const searchParams = await props.searchParams;

@@ -1,36 +1,16 @@
-// import NextAuth from 'next-auth';
-// import { authConfig } from './auth.config';
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-// import NextAuth from 'next-auth';
-// import { authConfig } from './auth.config';
-// import type { NextRequest } from 'next/server';
-// export default NextAuth(authConfig).auth;
- 
-// export const config = {
-//   // https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
-//   matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
-// };
+export async function proxy(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const isLoggedIn = !!token;
+  const role = token?.role as string | undefined;
 
-// middleware.ts
-// import NextAuth from 'next-auth';
-// import { authConfig } from './auth.config';
-
-// export default NextAuth(authConfig).auth;
-
-// export const config = {
-//   matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
-// };
-
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
-
-export default auth((req) => {
-  const { nextUrl, auth: session } = req;
-  const isLoggedIn = !!session?.user;
-  const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-  const isOnAdmin = nextUrl.pathname.startsWith('/dashboard/admin');
-  const isOnLogin = nextUrl.pathname.startsWith('/login');
-  const isOnRegister = nextUrl.pathname.startsWith('/register');
+  const { pathname } = req.nextUrl;
+  const isOnDashboard = pathname.startsWith('/dashboard');
+  const isOnAdmin = pathname.startsWith('/dashboard/admin');
+  const isOnLogin = pathname.startsWith('/login');
+  const isOnRegister = pathname.startsWith('/register');
 
   // Allow access to register page even if not logged in
   if (isOnRegister) {
@@ -39,62 +19,27 @@ export default auth((req) => {
 
   // Admin route protection
   if (isOnAdmin) {
-    if (isLoggedIn && session?.user?.role === 'admin') {
+    if (isLoggedIn && role === 'admin') {
       return NextResponse.next();
     }
-    // Not admin or not logged in, redirect to dashboard or login
-    return NextResponse.redirect(new URL(isLoggedIn ? '/dashboard' : '/login', nextUrl));
+    return NextResponse.redirect(new URL(isLoggedIn ? '/dashboard' : '/login', req.url));
   }
 
   // Dashboard protection (non‑admin routes)
   if (isOnDashboard) {
     if (isLoggedIn) return NextResponse.next();
-    return NextResponse.redirect(new URL('/login', nextUrl));
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   // If logged in and trying to access login, redirect to dashboard
   if (isLoggedIn && isOnLogin) {
-    return NextResponse.redirect(new URL('/dashboard', nextUrl));
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   // Allow all other routes
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
 };
-
-// import NextAuth from 'next-auth';
-// import { authConfig } from './auth.config';
-// export default NextAuth(authConfig).auth;
-// import { NextResponse } from 'next/server';
-// import type { NextRequest } from 'next/server';
-// import { getToken } from 'next-auth/jwt';
-
-// export async function proxy(request: NextRequest) {
-//   const token = await getToken({ 
-//     req: request,
-//     secret: process.env.NEXTAUTH_SECRET 
-//   });
-  
-//   const isLoggedIn = !!token;
-//   const isOnDashboard = request.nextUrl.pathname.startsWith('/dashboard');
-  
-//   if (isOnDashboard && !isLoggedIn) {
-//     const loginUrl = new URL('/login', request.url);
-//     return NextResponse.redirect(loginUrl);
-//   }
-  
-//   if (isLoggedIn && request.nextUrl.pathname === '/') {
-//     const dashboardUrl = new URL('/dashboard', request.url);
-//     return NextResponse.redirect(dashboardUrl);
-//   }
-  
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   // https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
-//   matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
-// };

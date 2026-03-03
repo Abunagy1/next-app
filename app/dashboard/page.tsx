@@ -1,4 +1,6 @@
 import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { Suspense } from 'react';
 import CardWrapper from '@/app/ui/dashboard/cards';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
@@ -9,7 +11,8 @@ import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton } from '@/a
 import { getUserCustomerIds } from '@/app/lib/data';
 export const dynamic = 'force-dynamic';
 export default async function Page() {
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'admin';
   let userCustomerIds: string[] = [];
   if (!isAdmin && session?.user?.id) {

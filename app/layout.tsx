@@ -1,4 +1,5 @@
 import { SessionProvider } from 'next-auth/react';
+import { Providers } from './providers';
 // This is called a root layout and is required in every Next.js application
 // this file name indicate that it creates and control the UI layout of the main home / route page
 // Any UI you add to this root layout will be shared across all pages in your application.
@@ -58,7 +59,7 @@ children,
         {children}
       </body> */}
       <body className={`${inter.className} antialiased`}>
-        <SessionProvider>
+        <Providers>
             <nav className="bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-800">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
@@ -76,7 +77,7 @@ children,
             </nav>
           <main>{children}</main>
           <ScrollToTop /> {/* ✅ Add this line */}
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );

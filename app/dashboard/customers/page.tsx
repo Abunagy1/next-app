@@ -1,4 +1,7 @@
-import { auth } from '@/auth';
+//import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
+
 import { Suspense } from 'react';
 import Search from '@/app/ui/search';
 import CustomersTable from '@/app/ui/customers/table';
@@ -15,7 +18,8 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'admin';
   let userCustomerIds: string[] = [];
   if (!isAdmin && session?.user?.id) {

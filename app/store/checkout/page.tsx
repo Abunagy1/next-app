@@ -1,4 +1,6 @@
-import { auth } from '@/auth';
+//import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getProductById } from '@/app/lib/data';
 import StripeCheckoutForm from '@/app/ui/store/checkout-form';
@@ -8,7 +10,8 @@ export default async function CheckoutPage({
 }: {
   searchParams?: Promise<{ productId?: string }>;
 }) {
-  const session = await auth();
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   const params = await searchParams || {};
   const productId = params.productId;
   if (!productId) redirect('/store');

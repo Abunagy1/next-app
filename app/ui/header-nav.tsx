@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
+
 export default function HeaderNav() {
-  const { data: session, status, update } = useSession();
   const pathname = usePathname();
   const hasRefreshed = useRef(false);
   const [mounted, setMounted] = useState(false);
+  const { data: session, status, update } = useSession();
   // Reset refresh flag on path change
   useEffect(() => {
     setMounted(true);

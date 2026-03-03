@@ -33,6 +33,8 @@ import { randomBytes } from 'crypto';
 import { sendVerificationEmail } from './email';
 import Stripe from 'stripe';
 import { getUserCustomerIds } from './data';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 // import { signIn, signOut, auth } from '@/auth'; // we'll sign them in after registration
 // import { AuthError } from 'next-auth';
 //import { sql } from '@vercel/postgres';
@@ -127,8 +129,9 @@ export type State = {
 };
 // ---------- Invoice Actions ----------
 export async function createInvoice(prevState: State, formData: FormData) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') {
     return { message: 'Forbidden: Only admins can create invoices.' };
   }
@@ -170,8 +173,9 @@ export async function updateInvoice(
   prevState: State,
   formData: FormData,
 ) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { message: 'Unauthorized' };
   const isAdmin = session.user.role === 'admin';
   // If not admin, check if invoice belongs to user's customers
@@ -218,8 +222,9 @@ export async function updateInvoice(
 //   revalidatePath('/dashboard/invoices');
 // }
 export async function deleteInvoice(id: string) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error('Unauthorized');
 
   const isAdmin = session.user.role === 'admin';
@@ -500,8 +505,9 @@ function generateSlug(title: string): string {
 //   redirect('/dashboard/posts');
 // }
 export async function createPost(prevState: string | undefined, formData: FormData) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) return 'You must be logged in to create a post.';
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
@@ -526,8 +532,9 @@ export async function updatePost(
   prevState: string | undefined,
   formData: FormData
 ) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) return 'Unauthorized';
   const isUserAdmin = session.user.role === 'admin';
   const validatedFields = PostSchema.safeParse({
@@ -566,8 +573,9 @@ export async function updatePost(
   redirect('/dashboard/posts');
 }
 export async function deletePost(postId: string) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error('Unauthorized');
   try {
     const isUserAdmin = session.user.role === 'admin';
@@ -670,8 +678,9 @@ export async function signup(prevState: string | undefined, formData: FormData) 
 
 export async function updateProfile(prevState: string | undefined, formData: FormData) {
   import('server-only');
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) return 'Unauthorized';
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
@@ -772,9 +781,10 @@ export async function updateProfile(prevState: string | undefined, formData: For
 //   }
 // }
 export async function deleteAccount(_prevState: string | undefined, _formData: FormData) {
-  const { auth } = await import('@/auth');
+  // const { auth } = await import('@/auth');
   const { signOut } = await import('@/auth');
-  const session = await auth();
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) return 'Unauthorized';
   try {
     // Delete user's posts first (cascade should handle if foreign key has CASCADE)
@@ -789,8 +799,9 @@ export async function deleteAccount(_prevState: string | undefined, _formData: F
 }
 export async function updateUserRole(prevState: string | undefined, formData: FormData) {
   import('server-only');
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') return 'Forbidden';
   const userId = formData.get('userId') as string;
   const role = formData.get('role') as string;
@@ -806,8 +817,9 @@ export async function updateUserRole(prevState: string | undefined, formData: Fo
 }
 export async function deleteUser(prevState: string | undefined, formData: FormData) {
   import('server-only');
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') return 'Forbidden';
   const userId = formData.get('userId') as string;
   if (!userId) return 'Missing user id';
@@ -844,7 +856,8 @@ async function ensureProductsDir() {
 }
 
 export async function createProduct(formData: FormData) {
-  const session = await auth();
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') throw new Error('Unauthorized');
   const name = formData.get('name') as string;
   const price = parseFloat(formData.get('price') as string);
@@ -869,7 +882,8 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(formData: FormData) {
-  const session = await auth();
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'admin') throw new Error('Unauthorized');
   const id = parseInt(formData.get('id') as string);
   const name = formData.get('name') as string;
@@ -910,9 +924,9 @@ export async function deleteProduct(id: number) {
 import { getProductById } from './data';
 
 export async function createStoreInvoice(formData: FormData) {
-  const { auth } = await import('@/auth');
-  const session = await auth();
-
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   const productId = formData.get('productId') as string;
   const quantity = parseInt(formData.get('quantity') as string) || 1;
   const name = formData.get('name') as string;

@@ -86,6 +86,7 @@
 // if (!handlers) {
 //   throw new Error('NextAuth did not return handlers. Check your providers and callbacks.');
 // }
+// auth.ts
 import 'server-only';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
@@ -94,9 +95,7 @@ import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcryptjs';
 
-// Database connection is now created inside the function to avoid build-time connection
 async function getUser(email: string): Promise<User | undefined> {
-  // Dynamically import postgres only when needed
   const postgres = await import('postgres');
   const sql = postgres.default(process.env.POSTGRES_URL!, { ssl: 'require' });
   try {
@@ -108,7 +107,8 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
-export const { auth, signIn, signOut, handlers } = NextAuth({
+// 👇 Define the options separately for reuse
+export const authOptions = {
   ...authConfig,
   secret: process.env.AUTH_SECRET,
   providers: [
@@ -150,4 +150,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       return session;
     },
   },
-});
+};
+
+export const { auth, signIn, signOut, handlers } = NextAuth(authOptions);

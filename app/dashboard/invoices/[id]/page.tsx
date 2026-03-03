@@ -4,11 +4,14 @@ import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 // To Read the invoice id from page params
 import { getUserCustomerIds } from '@/app/lib/data';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
-  const { auth } = await import('@/auth');
-  const session = await auth();
+  // const { auth } = await import('@/auth');
+  // const session = await auth();
+  const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'admin';
   let userCustomerIds: string[] = [];
   if (!isAdmin && session?.user?.id) {

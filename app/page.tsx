@@ -1,4 +1,6 @@
-import { auth } from '@/auth';
+//import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth'; // 👈 import the options
 import Link from 'next/link';
 import AcmeLogo from './ui/acme-logo';
 import { lusitana } from './ui/fonts';
@@ -7,7 +9,8 @@ import { getSortedPostsData } from '@/app/lib/posts';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 export const dynamic = 'force-dynamic';
 export default async function Page() {
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions); // 👈 use getServerSession
   const posts = await getSortedPostsData();
   const recentPosts = posts.slice(0, 3); // show latest 3 posts
   return (

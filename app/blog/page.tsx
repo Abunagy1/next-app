@@ -2,7 +2,9 @@ import { Metadata } from 'next';
 import Head from 'next/head';
 import Layout, { siteTitle } from '../../components/layout';
 import utilStyles from '../../styles/utils.module.css';
-import { auth } from '@/auth';
+//import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { getPosts } from '../lib/posts';
 import BlogPostList from '../ui/posts/post-list';
 import Link from 'next/link';
@@ -13,7 +15,8 @@ export const metadata: Metadata = {
   description: 'Next.js blog posts',
 };
 export default async function BlogPage() {
-  const session = await auth();
+  //const session = await auth();
+  const session = await getServerSession(authOptions);
   const posts = await getPosts(session?.user?.id);
   return (
     <Layout home>
