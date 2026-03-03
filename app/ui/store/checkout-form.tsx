@@ -6,40 +6,32 @@ import { loadStripe } from '@stripe/stripe-js';
 import { createPaymentIntent, createStoreInvoice } from '@/app/lib/actions';
 import { Product } from '@/app/lib/definitions';
 import { RadioGroup } from '@headlessui/react';
-
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 type PaymentMethod = 'stripe' | 'bank_transfer' | 'ideal' | 'sepa_debit';
-
 export default function CheckoutForm({ product, user }: { product: Product; user?: any }) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bankDetails, setBankDetails] = useState<any>(null);
   const [error, setError] = useState('');
-
   const handlePaymentMethodChange = async (method: PaymentMethod) => {
     setPaymentMethod(method);
     setClientSecret(null);
     setBankDetails(null);
     setError('');
-
     const formData = new FormData();
     formData.append('productId', product.id!.toString());
     formData.append('quantity', '1');
     formData.append('paymentMethod', method);
-
     const data = await createPaymentIntent(formData);
-    
     if (!data) {
       setError('No response from payment server');
       return;
     }
-
     // Check for error first
     if ('error' in data && data.error) {
       setError(data.error);
       return;
     }
-
     // Now data is the success union
     if (data.paymentMethod === 'bank_transfer') {
       setBankDetails(data.bankDetails);
@@ -52,7 +44,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
       }
     }
   };
-
   return (
     <div className="max-w-2xl mx-auto">
       {/* Payment Method Selection */}
@@ -76,7 +67,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
                 </div>
               )}
             </RadioGroup.Option>
-
             <RadioGroup.Option value="bank_transfer">
               {({ checked }) => (
                 <div className={`${checked ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} 
@@ -91,7 +81,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
                 </div>
               )}
             </RadioGroup.Option>
-
             <RadioGroup.Option value="ideal">
               {({ checked }) => (
                 <div className={`${checked ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} 
@@ -106,7 +95,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
                 </div>
               )}
             </RadioGroup.Option>
-
             <RadioGroup.Option value="sepa_debit">
               {({ checked }) => (
                 <div className={`${checked ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} 
@@ -124,7 +112,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
           </div>
         </RadioGroup>
       </div>
-
       {error && (
         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
           {error}
@@ -135,7 +122,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
       {paymentMethod === 'bank_transfer' && bankDetails && (
         <BankTransferDetails details={bankDetails} product={product} user={user} />
       )}
-
       {clientSecret && (paymentMethod === 'stripe' || paymentMethod === 'ideal' || paymentMethod === 'sepa_debit') && (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <StripePaymentForm 
@@ -148,7 +134,6 @@ export default function CheckoutForm({ product, user }: { product: Product; user
     </div>
   );
 }
-
 // Bank Transfer Details Component
 function BankTransferDetails({ details, product, user }: { details: any; product: Product; user?: any }) {
   const router = useRouter();
@@ -161,7 +146,6 @@ function BankTransferDetails({ details, product, user }: { details: any; product
     postalCode: '',
     country: '',
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -171,7 +155,6 @@ function BankTransferDetails({ details, product, user }: { details: any; product
     form.append('paymentMethod', 'bank_transfer');
     form.append('paymentReference', details.reference);
     Object.entries(shipping).forEach(([key, value]) => form.append(key, value));
-    
     try {
       const result = await createStoreInvoice(form);
       if (result?.invoiceId) {
@@ -188,7 +171,6 @@ function BankTransferDetails({ details, product, user }: { details: any; product
       setIsSubmitting(false);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Shipping fields */}

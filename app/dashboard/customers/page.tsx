@@ -7,27 +7,22 @@ import { lusitana } from '@/app/ui/fonts';
 import { fetchFilteredCustomersForUserPaginated, getUserCustomerIds, fetchCustomersPages } from '@/app/lib/data';
 import { formatCurrency } from '@/app/lib/utils';
 import { CustomersTableSkeleton } from '@/app/ui/skeletons';
-
+export const dynamic = 'force-dynamic';
 const ITEMS_PER_PAGE = 6; // must match the one in fetchCustomersPages
-
 export default async function Page(props: {
   searchParams?: Promise<{ query?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-
   const session = await auth();
   const isAdmin = session?.user?.role === 'admin';
-
   let userCustomerIds: string[] = [];
   if (!isAdmin && session?.user?.id) {
     userCustomerIds = await getUserCustomerIds(session.user.id);
   }
-
   // Fetch total pages for pagination
   const totalPages = await fetchCustomersPages(query, userCustomerIds, isAdmin);
-
   // Fetch customers for the current page (you'll need to modify fetchFilteredCustomersForUser to accept offset/limit)
   // We'll create a new version that includes pagination, or modify the existing one.
   // For now, let's create a separate function: fetchFilteredCustomersForUserPaginated
@@ -38,7 +33,6 @@ export default async function Page(props: {
     userCustomerIds,
     isAdmin
   );
-
   const formattedCustomers = rawCustomers.map(customer => ({
     id: customer.id,
     name: customer.name,
@@ -48,7 +42,6 @@ export default async function Page(props: {
     total_pending: formatCurrency(customer.total_pending),
     total_paid: formatCurrency(customer.total_paid),
   }));
-
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">

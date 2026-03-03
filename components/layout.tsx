@@ -43,7 +43,6 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
         <meta name="og:title" content={siteTitle} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
-
       <header className="mb-8 text-center md:text-left">
         {home ? (
           <div className="flex flex-col items-center">
@@ -78,9 +77,7 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
           </div>
         )}
       </header>
-
       <main className="min-h-screen">{children}</main>
-
       {!home && (
         <footer className={styles.backToHome}>
           <Link

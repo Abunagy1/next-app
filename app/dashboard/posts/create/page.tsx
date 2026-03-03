@@ -1,5 +1,6 @@
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import CreatePostForm from '@/app/ui/posts/create-form';
+export const dynamic = 'force-dynamic';
 export default async function Page() {
   return (
     <main>

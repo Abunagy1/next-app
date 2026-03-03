@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import postgres from 'postgres';
 import ProfileView from '@/app/ui/profiles/profile-view';
 import { ProfileUser } from '@/app/lib/definitions';
+export const dynamic = 'force-dynamic';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function ProfilePage() {
   const session = await auth();

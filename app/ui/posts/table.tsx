@@ -1,18 +1,13 @@
+'use client'
 import Image from 'next/image';
 import { UpdatePost, DeletePost } from '@/app/ui/posts/buttons';
 import { formatDateToLocal } from '@/app/lib/utils';
-import { fetchFilteredPosts } from '@/app/lib/data';
+//import { fetchFilteredPosts } from '@/app/lib/data';
 import Link from 'next/link';
 
-export default async function PostsTable({
-  query,
-  currentPage,
-}: {
-  query: string;
-  currentPage: number;
-}) {
-  const posts = await fetchFilteredPosts(query, currentPage);
-
+// ✅ Receive posts as props
+export default function PostsTable({ posts }: { posts: any[] }) {
+  //const posts = await fetchFilteredPosts(query, currentPage);
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">

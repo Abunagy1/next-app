@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import Stripe from 'stripe'; // you may export stripe instance
+export const dynamic = 'force-dynamic';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-02-25.clover',
 });

@@ -19,7 +19,6 @@ export default function NavLinks() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === 'admin';
-
   // Determine if we are on a dashboard page
   //const isDashboard = pathname.startsWith('/dashboard');
   // Home link goes to '/' when the path starts with dashboard, 

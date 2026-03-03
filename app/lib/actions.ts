@@ -29,7 +29,6 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 //This schema will validate the formData before saving it to a database.
 import postgres from 'postgres';
-import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { sendVerificationEmail } from './email';
 import Stripe from 'stripe';
@@ -40,6 +39,7 @@ import { getUserCustomerIds } from './data';
 //import { redirect } from 'next/navigation';
 // ... existing imports and code
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+import bcrypt from 'bcryptjs';
 // ---------- Invoice Schemas ----------
 // const FormSchema = z.object({
 //   id: z.string(),
@@ -247,8 +247,6 @@ export async function deleteInvoice(id: string) {
   }
 }
 
-
-
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 //   apiVersion: '2026-02-25.clover', // use latest stable version
 // });
@@ -333,30 +331,50 @@ export async function createPaymentIntent(formData: FormData) {
   }
 }
 // ---------- Authentication ----------
+import { signIn } from '@/auth'; // Import directly from your auth config
+
 export async function authenticate(
   prevState: string | undefined,
-  formData: FormData,
+  formData: FormData
 ) {
-  const { signIn } = await import('@/auth');
-  const { AuthError } = await import('next-auth');
   try {
     await signIn('credentials', {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
-      redirectTo: '/dashboard', // Change this
+      redirectTo: '/dashboard',
     });
   } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
+    // NextAuth.js v5 throws CredentialsSignin error directly
+    if (error instanceof Error) {
+      // Check for specific error types if needed
+      if (error.message.includes('CredentialsSignin')) {
+        return 'Invalid credentials.';
       }
+      return error.message || 'Something went wrong.';
     }
-    throw error;
+    return 'Something went wrong.';
   }
 }
+//or if prefer to use the specific error classes, they are now exported from '@auth/core/errors'.
+//you should install if are going to usethis function --> npm install @auth/core
+// import { CredentialsSignin } from '@auth/core/errors';
+// export async function authenticate(
+//   prevState: string | undefined,
+//   formData: FormData
+// ) {
+//   try {
+//     await signIn('credentials', {
+//       email: formData.get('email') as string,
+//       password: formData.get('password') as string,
+//       redirectTo: '/dashboard',
+//     });
+//   } catch (error) {
+//     if (error instanceof CredentialsSignin) {
+//       return 'Invalid credentials.';
+//     }
+//     return 'Something went wrong.';
+//   }
+// }
 
 // ---------- Password Reset ----------
 export async function requestPasswordReset(prevState: string | undefined, formData: FormData) {

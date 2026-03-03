@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import postgres from 'postgres';
 import AdminProducts from '@/app/ui/admin/products-admin';
 import { Product } from '@/app/lib/definitions';
+export const dynamic = 'force-dynamic';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function StoreEditPage() {
   const session = await auth();

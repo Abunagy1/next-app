@@ -5,14 +5,12 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Product } from '@/app/lib/definitions';
 import styles from './products.module.css';
-
 // Separate component for each product card to manage its own error state
 function ProductCard({ product }: { product: Product }) {
   const [imgError, setImgError] = useState(false);
   const imageSrc = imgError 
     ? '/products/placeholder.jpg' 
     : `/products/${product.image}`;
-
   return (
     <div className={`${styles.productCard} ${styles[product.type] || ''}`}>
       <h2>{product.name.charAt(0).toUpperCase() + product.name.slice(1)}</h2>
@@ -37,13 +35,11 @@ function ProductCard({ product }: { product: Product }) {
     </div>
   );
 }
-
 export default function Products({ initialProducts }: { initialProducts: Product[] }) {
   const { data: session, status } = useSession();
   const [filtered, setFiltered] = useState<Product[]>(initialProducts);
   const [category, setCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-
   useEffect(() => {
     let results = initialProducts;
     if (category !== 'All') {
@@ -59,7 +55,6 @@ export default function Products({ initialProducts }: { initialProducts: Product
   if (status === 'loading') {
     return <div className={styles.storeContainer}>Loading...</div>;
   }
-
   return (
     <div className={styles.storeContainer}>
       <header className={styles.header}>

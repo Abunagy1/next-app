@@ -7,16 +7,14 @@ import { getPosts } from '../lib/posts';
 import BlogPostList from '../ui/posts/post-list';
 import Link from 'next/link';
 import { PlusIcon } from '@heroicons/react/24/outline';
-
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Next.js blog posts',
 };
-
 export default async function BlogPage() {
   const session = await auth();
   const posts = await getPosts(session?.user?.id);
-
   return (
     <Layout home>
       <Head>

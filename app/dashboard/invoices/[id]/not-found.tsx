@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { FaceFrownIcon } from '@heroicons/react/24/outline';
+export const dynamic = 'force-dynamic';
 export default function NotFound() {
   return (
     <main className="flex h-full flex-col items-center justify-center gap-2">

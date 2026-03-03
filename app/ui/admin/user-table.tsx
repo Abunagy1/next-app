@@ -3,7 +3,6 @@ import { useActionState } from 'react';
 import { updateUserRole, deleteUser } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import { User } from '@/app/lib/definitions';
-
 export default function AdminUserTable({ users }: { users: User[] }) {
   return (
     <div className="overflow-x-auto">
@@ -42,7 +41,6 @@ export default function AdminUserTable({ users }: { users: User[] }) {
     </div>
   );
 }
-
 function RoleSelect({ userId, currentRole }: { userId: string; currentRole: string }) {
   const [state, formAction] = useActionState(updateUserRole, undefined);
   return (
@@ -66,7 +64,6 @@ function RoleSelect({ userId, currentRole }: { userId: string; currentRole: stri
     </form>
   );
 }
-
 function DeleteUser({ userId }: { userId: string }) {
   const [state, formAction] = useActionState(deleteUser, undefined);
   return (

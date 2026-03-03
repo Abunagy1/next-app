@@ -5,6 +5,7 @@ import { lusitana } from './ui/fonts';
 import Image from 'next/image';
 import { getSortedPostsData } from '@/app/lib/posts';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+export const dynamic = 'force-dynamic';
 export default async function Page() {
   const session = await auth();
   const posts = await getSortedPostsData();

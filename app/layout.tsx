@@ -15,6 +15,7 @@ import ThemeToggle from '@/app/ui/theme-toggle';
 import Link from 'next/link';
 import HeaderNav from '@/app/ui/header-nav';
 import ScrollToTop from '@/app/ui/scroll-to-top';
+export const dynamic = 'force-dynamic'; // ← ADD THIS LINE
 export const metadata: Metadata = {
   title: {
     template: '%s | NAGY Dashboard',

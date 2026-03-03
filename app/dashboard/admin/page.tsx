@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import postgres from 'postgres';
 import AdminUserTable from '../../ui/admin/user-table';
 import { User } from '@/app/lib/definitions'; // ✅ Import User type
+export const dynamic = 'force-dynamic';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function AdminPage() {
   const session = await auth();

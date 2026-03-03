@@ -1,19 +1,20 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-
 export default function HeaderNav() {
   const { data: session, status, update } = useSession();
   const pathname = usePathname();
   const hasRefreshed = useRef(false);
-
+  const [mounted, setMounted] = useState(false);
   // Reset refresh flag on path change
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   useEffect(() => {
     hasRefreshed.current = false;
   }, [pathname]);
-
   // Attempt to refresh session once per navigation if unauthenticated
   useEffect(() => {
     if (status === 'unauthenticated' && !hasRefreshed.current) {
@@ -21,7 +22,10 @@ export default function HeaderNav() {
       update();
     }
   }, [pathname, status, update]);
-
+  // During SSR or initial hydration, show a simple placeholder
+  if (!mounted) {
+    return <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />;
+  }
   const linkClasses = (href: string) => {
     const isActive = pathname === href;
     return `px-4 py-2.5 rounded-md text-lg font-medium transition-colors ${
@@ -30,13 +34,10 @@ export default function HeaderNav() {
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
     }`;
   };
-
   const buttonClasses = `px-4 py-2.5 rounded-md text-lg font-medium transition-colors bg-blue-500 hover:bg-blue-600 text-white`;
-
   if (status === 'loading') {
     return <div className="w-24 h-10 bg-gray-200 rounded animate-pulse" />;
   }
-
   return (
     <div className="flex items-center space-x-3">
       <Link href="/blog" className={linkClasses('/blog')}>

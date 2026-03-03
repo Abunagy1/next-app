@@ -8,6 +8,7 @@ import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { getUserCustomerIds } from '@/app/lib/data';
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Invoices',
 };

@@ -4,7 +4,6 @@ import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 // To Read the invoice id from page params
 import { getUserCustomerIds } from '@/app/lib/data';
-
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;

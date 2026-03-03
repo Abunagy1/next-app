@@ -7,22 +7,19 @@ import UserInvoiceCards from '@/app/ui/dashboard/user-invoice-cards'; // new com
 import { lusitana } from '@/app/ui/fonts';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
 import { getUserCustomerIds } from '@/app/lib/data';
-
+export const dynamic = 'force-dynamic';
 export default async function Page() {
   const session = await auth();
   const isAdmin = session?.user?.role === 'admin';
-
   let userCustomerIds: string[] = [];
   if (!isAdmin && session?.user?.id) {
     userCustomerIds = await getUserCustomerIds(session.user.id);
   }
-
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-2xl md:text-3xl text-gray-900 dark:text-white`}>
         Dashboard
       </h1>
-
       {isAdmin ? (
         // Admin view: full dashboard
         <>

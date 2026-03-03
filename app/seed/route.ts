@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import postgres from 'postgres';
 import { invoices, customers, revenue, users, posts as placeholderPosts, products } from '../lib/placeholder-data';
 import { NextResponse } from 'next/server';

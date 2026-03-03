@@ -1,3 +1,4 @@
+
 import Pagination from '@/app/ui/posts/pagination';
 import Search from '@/app/ui/search';
 import { CreatePost } from '@/app/ui/posts/buttons';
@@ -7,6 +8,8 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { fetchPostsPages } from '@/app/lib/data';
 import PostsTable from '@/app/ui/posts/table';
+import { fetchFilteredPosts } from '@/app/lib/data'; // ✅ still used here (server)
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Posts',
 };
@@ -20,6 +23,8 @@ export default async function Page(props: {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = await fetchPostsPages(query);
+    // ✅ Fetch data on the server
+  const posts = await fetchFilteredPosts(query, currentPage);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -30,7 +35,9 @@ export default async function Page(props: {
         <CreatePost />
       </div>
       <Suspense key={query + currentPage} fallback={<PostsTableSkeleton />}>
-        <PostsTable query={query} currentPage={currentPage} />
+        {/* <PostsTable query={query} currentPage={currentPage} /> */}
+        {/* ✅ Pass data as props */}
+        <PostsTable posts={posts} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

@@ -9,16 +9,19 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { getAllPostIds, getPostData, getSortedPostsData } from '@/app/lib/posts';
 import { PencilIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
-
+export const dynamic = 'force-dynamic';
 type Props = {
   params: Promise<{ id: string }>;
 };
 
+/*
+For the blog post page, you have generateStaticParams. Adding dynamic = 'force-dynamic' will make the page render dynamically,
+but it will still generate the paths. If you need truly static blog posts without authentication, remove the auth() usage from that page.
+*/
 export async function generateStaticParams() {
   const paths = await getAllPostIds();
   return paths.map((path) => ({ id: path.params.id }));
 }
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const postData = await getPostData(id);
@@ -28,15 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: postData.contentHtml.replace(/<[^>]*>/g, '').substring(0, 160),
   };
 }
-
-
-
 export default async function Post({ params }: Props) {
   const { id } = await params;
   const session = await auth();
   const backLink = session ? '/dashboard' : '/';
   const backLabel = session ? 'Back to Dashboard' : 'Back to Home';
-
   const allPosts = await getSortedPostsData();
   let postData;
   try {
@@ -45,16 +44,13 @@ export default async function Post({ params }: Props) {
   } catch {
     notFound();
   }
-
   // Check if user can edit (author or admin)
   const canEdit = session?.user && (
     session.user.id === postData.user_id || session.user.role === 'admin'
   );
-
   const currentIndex = allPosts.findIndex(post => post.slug === id);
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
-
   return (
     <Layout backHref={backLink} backLabel={backLabel}>
       <Head>
@@ -82,7 +78,6 @@ export default async function Post({ params }: Props) {
             <Date dateString={postData.created_at} />
           </div>
         </header>
-
         {/* Images at the top (if any) */}
         {postData.images && postData.images.length > 0 && (
           <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -99,13 +94,11 @@ export default async function Post({ params }: Props) {
             ))}
           </div>
         )}
-
         {/* Content */}
         <div
           className="prose prose-lg dark:prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
         />
-
         {/* Navigation between posts */}
         <nav className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex justify-between">
           {prevPost ? (

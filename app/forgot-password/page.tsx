@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import ForgotPasswordForm from '../ui/forgot-password-form';
 import AcmeLogo from '@/app/ui/acme-logo';
-
+export const dynamic = 'force-dynamic';
 export default function ForgotPasswordPage() {
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
