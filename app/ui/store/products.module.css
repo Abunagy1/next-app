@@ -21,8 +21,8 @@
     font-size: 4rem;
     font-weight: bold;
     font-family: 'Cherry Swash', cursive;
-    background: url('/icons/bean_can.png') no-repeat 20% center,
-        url('/icons/bean_can.png') no-repeat 80% center;
+    background: url('/icons/IMG_ICO.JPG') no-repeat 20% center,
+        url('/icons/IMG_ICO.JPG') no-repeat 80% center;
     background-size: 64px 64px;
     padding: 1rem 0;
     /* gray-800 */
@@ -97,6 +97,14 @@
     margin-bottom: 0.5rem;
     text-transform: capitalize;
     padding-right: 3rem;
+    /* space for price circle */
+    padding-left: 50px;
+    /* space for the category icon */
+    min-height: 48px;
+    /* ensure enough height for the icon */
+    display: flex;
+    align-items: center;
+    /* vertically center text with icon */
 }
 
 .productCard .price {
