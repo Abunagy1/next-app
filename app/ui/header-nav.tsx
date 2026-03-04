@@ -44,7 +44,7 @@ export default function HeaderNav() {
   const isAdmin = session?.user?.role === 'admin';
 
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-3">
       {/* Always visible: Blog and Store */}
       <Link href="/blog" className={linkClasses('/blog')}>Blog</Link>
       <Link href="/store" className={linkClasses('/store')}>Store</Link>

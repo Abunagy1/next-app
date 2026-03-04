@@ -33,6 +33,7 @@ children,
   return ( // it return an html main page
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Inline script to set the correct theme before React hydrates,
             preventing a flash of incorrect colors. */}
         <script
@@ -60,22 +61,26 @@ children,
       </body> */}
       <body className={`${inter.className} antialiased`}>
         <Providers>
-            <nav className="bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-800">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
-                  <div className="flex items-center space-x-8">
-                    <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
-                      NAGY
-                    </Link>
-                    <HeaderNav />
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <ThemeToggle />
-                  </div>
+          <nav className="bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-800">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col md:flex-row justify-between items-center py-2 md:py-0">
+                {/* left side: logo and nav */}
+                <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-8 w-full md:w-auto">
+                  <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+                    NAGY
+                  </Link>
+                  <HeaderNav />
+                </div>
+                {/* theme toggle */}
+                <div className="mt-2 md:mt-0">
+                  <ThemeToggle />
                 </div>
               </div>
-            </nav>
-          <main>{children}</main>
+            </div>
+          </nav>
+          <main className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+            {children}
+          </main>
           <ScrollToTop /> {/* ✅ Add this line */}
         </Providers>
       </body>
