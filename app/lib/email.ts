@@ -129,3 +129,44 @@ export async function sendPurchaseConfirmation(email: string, details: any) {
 //   }
 // }
 
+export async function sendContactEmails(name: string, userEmail: string, message: string) {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.MAIL_ID,
+      pass: process.env.MAIL_PASSWORD,
+    },
+  });
+
+  // Email to admin (you)
+  const adminMail = await transporter.sendMail({
+    from: `"Contact Form" <${process.env.MAIL_ID}>`,
+    to: process.env.MAIL_ID,
+    subject: `New contact message from ${name}`,
+    html: `
+      <h1>New Contact Message</h1>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${userEmail}</p>
+      <p><strong>Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>
+    `,
+  });
+
+  // Confirmation email to user
+  const userMail = await transporter.sendMail({
+    from: `"Your Name" <${process.env.MAIL_ID}>`,
+    to: userEmail,
+    subject: 'Thank you for contacting us',
+    html: `
+      <h1>Thank you for reaching out!</h1>
+      <p>Dear ${name},</p>
+      <p>We have received your message and will get back to you as soon as possible.</p>
+      <p>Here is a copy of your message:</p>
+      <blockquote>${message.replace(/\n/g, '<br>')}</blockquote>
+      <p>Best regards,<br>Your Team</p>
+    `,
+  });
+
+  console.log('✅ Contact emails sent:', adminMail.messageId, userMail.messageId);
+}

@@ -30,7 +30,7 @@ import { z } from 'zod';
 //This schema will validate the formData before saving it to a database.
 import postgres from 'postgres';
 import { randomBytes } from 'crypto';
-import { sendVerificationEmail } from './email';
+import { sendVerificationEmail, sendContactEmails } from './email';
 import Stripe from 'stripe';
 import { getUserCustomerIds } from './data';
 import { getServerSession } from 'next-auth';
@@ -999,4 +999,35 @@ export async function createStoreInvoice(formData: FormData) {
   } else {
     redirect(`/store/checkout/success?invoiceId=${invoiceId}`);
   }
+}
+
+
+// ---------- Contact Form ----------
+const ContactSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+
+export async function sendContactMessage(prevState: string | undefined, formData: FormData) {
+  const validatedFields = ContactSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    message: formData.get('message'),
+  });
+
+  if (!validatedFields.success) {
+    return validatedFields.error.flatten().formErrors.join(', ');
+  }
+
+  const { name, email, message } = validatedFields.data;
+
+  try {
+    await sendContactEmails(name, email, message);
+  } catch (error) {
+    console.error('Error sending contact emails:', error);
+    return 'Failed to send message. Please try again later.';
+  }
+
+  redirect('/contact/thank-you');
 }
