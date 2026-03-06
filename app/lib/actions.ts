@@ -1006,28 +1006,32 @@ export async function createStoreInvoice(formData: FormData) {
 const ContactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  message: z.string().min(2, 'Message must be at least 2 characters'),
 });
 
 export async function sendContactMessage(prevState: string | undefined, formData: FormData) {
+  //console.log('🔵 sendContactMessage started');
+  //console.log('FormData entries:', Array.from(formData.entries()));
   const validatedFields = ContactSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     message: formData.get('message'),
   });
-
+  console.log('Validation result:', validatedFields);
   if (!validatedFields.success) {
+    console.log('❌ Validation failed:', validatedFields.error.flatten());
     return validatedFields.error.flatten().formErrors.join(', ');
   }
-
   const { name, email, message } = validatedFields.data;
-
+  console.log('✅ Validation passed:', { name, email, messageLength: message.length });
   try {
+    console.log('📧 Calling sendContactEmails...');
     await sendContactEmails(name, email, message);
+    console.log('✅ Emails sent successfully');
   } catch (error) {
-    console.error('Error sending contact emails:', error);
+    console.error('❌ Error sending contact emails:', error);
     return 'Failed to send message. Please try again later.';
   }
-
+  console.log('🔄 Redirecting to thank-you page');
   redirect('/contact/thank-you');
 }

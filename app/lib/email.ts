@@ -130,6 +130,9 @@ export async function sendPurchaseConfirmation(email: string, details: any) {
 // }
 
 export async function sendContactEmails(name: string, userEmail: string, message: string) {
+  // console.log('📨 sendContactEmails called with:', { name, userEmail, messageLength: message.length });
+  // console.log('MAIL_ID exists:', !!process.env.MAIL_ID);
+  // console.log('MAIL_PASSWORD exists:', !!process.env.MAIL_PASSWORD);
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
@@ -139,7 +142,6 @@ export async function sendContactEmails(name: string, userEmail: string, message
       pass: process.env.MAIL_PASSWORD,
     },
   });
-
   // Email to admin (you)
   const adminMail = await transporter.sendMail({
     from: `"Contact Form" <${process.env.MAIL_ID}>`,
@@ -152,7 +154,6 @@ export async function sendContactEmails(name: string, userEmail: string, message
       <p><strong>Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>
     `,
   });
-
   // Confirmation email to user
   const userMail = await transporter.sendMail({
     from: `"Your Name" <${process.env.MAIL_ID}>`,
@@ -167,6 +168,5 @@ export async function sendContactEmails(name: string, userEmail: string, message
       <p>Best regards,<br>Your Team</p>
     `,
   });
-
   console.log('✅ Contact emails sent:', adminMail.messageId, userMail.messageId);
 }

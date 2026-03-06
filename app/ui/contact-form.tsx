@@ -58,13 +58,18 @@ export default function ContactForm() {
               rows={5}
               placeholder="Your message..."
               required
+              minLength={2}  // HTML5 validation (optional, but helpful)
+              maxLength={1000} // optional limit
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
             <ChatBubbleLeftIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           </div>
+        {/* Helper text */}
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Minimum 2 characters
+        </p>
         </div>
       </div>
-
       {errorMessage && (
         <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
           {errorMessage}
