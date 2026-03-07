@@ -65,6 +65,7 @@ export default async function Page() {
                   alt="Dashboard preview"
                   fill
                   className="object-cover rounded-full shadow-2xl" // ← rounded-full makes it circular
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   priority
                 />
               </div>
@@ -87,6 +88,7 @@ export default async function Page() {
               alt="Mobile app preview"
               fill
               className="object-cover rounded-2xl shadow-2xl"
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
           </div>

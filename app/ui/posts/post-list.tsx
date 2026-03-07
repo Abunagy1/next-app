@@ -60,7 +60,7 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
               {/* Image / Placeholder */}
               <div className="h-48 bg-gradient-to-br from-blue-400 to-indigo-500 relative">
                 {imageUrl ? (
-                  <Image src={imageUrl} alt={post.title} fill className="object-cover" />
+                  <Image src={imageUrl} sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt={post.title} fill className="object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-20">
                     {post.title.charAt(0)}
@@ -82,7 +82,7 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
                   <p className="text-gray-600 dark:text-gray-300 mt-3 line-clamp-3">
                     {post.content.replace(/[#*`]/g, '').substring(0, 120)}...
                   </p>
-                )}
+                )}ƒ
               </div>
             </Link>
           );

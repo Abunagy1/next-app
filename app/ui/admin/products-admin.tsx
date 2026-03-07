@@ -31,6 +31,7 @@ export default function AdminProducts({ products: initialProducts }: { products:
                 src={`/products/${product.image}`}
                 alt={product.name}
                 fill
+                sizes="(max-width: 768px) 100vw, 200px"
                 className="object-contain"
               />
             </div>
