@@ -18,7 +18,7 @@ export function CreatePost() {
 export function UpdatePost({ id }: { id: string }) {
   return (
     <Link
-      href={`/dashboard/posts/${id}/edit`}
+      href={`/dashboard/posts/${id}`}
       className="rounded-md border-2 p-2 hover:bg-gray-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
     >
       <PencilIcon className="w-5" />
