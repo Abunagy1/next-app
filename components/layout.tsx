@@ -18,8 +18,8 @@ type LayoutProps = {
   home?: boolean;
   backHref?: string; // new optional prop
   backLabel?: string; // new prop for custom link text
+  authorImage?: string | null; // new optional prop
 };
-
 export const siteTitle = 'Next.js Daynamic Website';
 export function Alert({ children, type }) {
     return (
@@ -33,16 +33,17 @@ export function Alert({ children, type }) {
         </div>
     );
 }
-export default function Layout({ children, home, backHref, backLabel = "Back to home" }: LayoutProps) {
+export default function Layout({ children, home, backHref, backLabel = "Back to home", authorImage }: LayoutProps) {
   const [error, setError] = useState(false);
-  const imageSrc = error ? '/default-avatar.png' : '/blog/blog.jpg';
+    // Use authorImage if provided (and not errored), otherwise fallback to default
+  const imageSrc = error ? '/default-avatar.png' : (authorImage || '/blog/blog.jpg');
   return (
     <div className={styles.container}>
       <Head>
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Learn how to build a personal website using Next.js"
+          content="a personal website build using Next.js"
         />
         <meta property="og:image" content={`https://og-image.vercel.app/${encodeURI(siteTitle)}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`} />
         <meta name="og:title" content={siteTitle} />
@@ -68,7 +69,7 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
             <Link href="/" className="flex items-center gap-3">
               <Image
                 priority
-                src="/blog/post.jpg"
+                src={imageSrc}
                 className="rounded-full border-2 border-blue-500"
                 height={48}
                 width={48}

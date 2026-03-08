@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { getAllPostIds, getPostData, getSortedPostsData } from '@/app/lib/posts';
 import { PencilIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { getUserById } from '@/app/lib/data'; // add import
 export const dynamic = 'force-dynamic';
 type Props = {
   params: Promise<{ id: string }>;
@@ -43,6 +44,7 @@ export default async function Post({ params }: Props) {
   let postData;
   try {
     postData = await getPostData(id);
+    
     if (!postData) notFound();
   } catch {
     notFound();
@@ -51,11 +53,12 @@ export default async function Post({ params }: Props) {
   const canEdit = session?.user && (
     session.user.id === postData.user_id || session.user.role === 'admin'
   );
+  const user = postData ? await getUserById(postData.user_id) : null;
   const currentIndex = allPosts.findIndex(post => post.slug === id);
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
   return (
-    <Layout backHref={backLink} backLabel={backLabel}>
+    <Layout backHref={backLink} backLabel={backLabel} authorImage={user?.image}>
       <Head>
         <title>{postData.title}</title>
       </Head>

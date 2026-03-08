@@ -37,7 +37,19 @@ type RawLatestInvoice = {
   email: string;
   amount: number;
 };
+import { User } from './definitions';
 
+export async function getUserById(userId: string): Promise<Pick<User, 'name' | 'image'> | null> {
+  try {
+    const users = await sql<Pick<User, 'name' | 'image'>[]>`
+      SELECT name, image FROM users WHERE id = ${userId}
+    `;
+    return users[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    return null;
+  }
+}
 // export async function fetchLatestInvoices(userCustomerIds?: string[]): Promise<LatestInvoice[]> {
 //   try {
 //     // Build WHERE clause dynamically using sql conditions
