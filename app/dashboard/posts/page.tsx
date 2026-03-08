@@ -24,12 +24,16 @@ export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
+    deleted?: string;
+    error?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-
+  const deleted = searchParams?.deleted;
+  const error = searchParams?.error;
+  
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   const isAdmin = session?.user?.role === 'admin';
@@ -54,6 +58,27 @@ export default async function Page(props: {
 
   return (
     <div className="w-full">
+      {deleted && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
+          Post deleted successfully!
+        </div>
+      )}
+      {error === 'unauthorized' && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+          You don't have permission to delete this post.
+        </div>
+      )}
+      {error === 'notfound' && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+          Post not found.
+        </div>
+      )}
+      {error === 'failed' && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+          Failed to delete post. Please try again.
+        </div>
+      )}
+      {/* rest of your JSX */}
       <div className="flex w-full items-center justify-between">
         <h1 className={`${lusitana.className} text-2xl`}>Posts</h1>
       </div>

@@ -31,8 +31,27 @@ export default function LoginForm() {
       callbackUrl,
     });
 
+    // if (result?.error) {
+    //   setError(result.error);
+    //   setLoading(false);
+    // } else {
+    //   router.push(result?.url || callbackUrl);
+    // }
     if (result?.error) {
-      setError(result.error);
+      // Map the error message from the authorize function
+      switch (result.error) {
+        case 'User not found':
+          setError('This user does not exist. Please sign up first.');
+          break;
+        case 'Invalid password':
+          setError('Incorrect password. Please try again.');
+          break;
+        case 'Email not verified':
+          setError('Please verify your email before logging in.');
+          break;
+        default:
+          setError('Invalid credentials. Please try again.');
+      }
       setLoading(false);
     } else {
       router.push(result?.url || callbackUrl);
@@ -89,7 +108,7 @@ export default function LoginForm() {
         {loading ? 'Logging in...' : 'Log in'} <ArrowRightIcon className="ml-2 h-5 w-5" />
       </Button>
       {error && (
-        <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+        <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">  
           <ExclamationCircleIcon className="h-5 w-5" />
           <p>{error}</p>
         </div>

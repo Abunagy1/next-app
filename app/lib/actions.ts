@@ -785,9 +785,9 @@ export async function updateProfile(prevState: string | undefined, formData: For
 //     return 'Failed to update profile';
 //   }
 // }
+//const { signOut } = await import('@/auth');
 export async function deleteAccount(_prevState: string | undefined, _formData: FormData) {
   // const { auth } = await import('@/auth');
-  const { signOut } = await import('@/auth');
   // const session = await auth();
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return 'Unauthorized';
@@ -795,12 +795,19 @@ export async function deleteAccount(_prevState: string | undefined, _formData: F
     // Delete user's posts first (cascade should handle if foreign key has CASCADE)
     await sql`DELETE FROM posts WHERE user_id = ${session.user.id}`;
     await sql`DELETE FROM users WHERE id = ${session.user.id}`;
-    // Sign out after deletion
-    await signOut({ redirectTo: '/' });
+
   } catch (error) {
     console.error(error);
     return 'Failed to delete account';
   }
+    // Sign out after deletion
+    // await signOut({ redirectTo: '/' });
+    // ✅ Redirect should be the last thing – no return after this
+    redirect('/auth/signout');
+    // you can use absolute Url
+    //redirect(new URL('/auth/signout-client', process.env.NEXTAUTH_URL).toString());
+    //you can hardcoded it, if you don't have NEXTAUTH_URL
+    //redirect('http://localhost:3000/auth/signout-client');
 }
 export async function updateUserRole(prevState: string | undefined, formData: FormData) {
   import('server-only');

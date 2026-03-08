@@ -8,7 +8,6 @@ import { ProfileUser } from '@/app/lib/definitions';
 export const dynamic = 'force-dynamic';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function EditProfilePage() {
-  //const session = await auth();
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect('/login');
   const users = await sql<ProfileUser[]>`
@@ -17,6 +16,11 @@ export default async function EditProfilePage() {
     WHERE id = ${session.user.id}
   `;
   const user = users[0];
+  if (!user) {
+    // User not found – redirect to login and clear session (optional)
+    // Since signOut can't be used here, just redirect with an error param
+    redirect('/login?error=usernotfound');
+  }
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>

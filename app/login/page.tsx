@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export default async function LoginPage({
   searchParams,
 }: {
-    searchParams?: Promise<{ registered?: string; verified?: string; reset?: string }>;
+    searchParams?: Promise<{ registered?: string; verified?: string; reset?: string; error?: string; deleted?: string }>;
 }) {
   const params = await searchParams || {};
 
@@ -30,11 +30,21 @@ export default async function LoginPage({
               Email verified! You can now log in.
             </div>
           )}
-            {params.reset === '1' && (
-              <div className="mb-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg text-sm">
-                Password reset successful! You can now log in with your new password.
+          {params.reset === '1' && (
+            <div className="mb-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg text-sm">
+              Password reset successful! You can now log in with your new password.
+            </div>
+          )}
+            {params.error === 'usernotfound' && (
+              <div className="mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
+                Your account no longer exists. Please sign up again.
               </div>
-            )}
+          )}
+          {params.deleted === 'true' && (
+            <div className="mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
+              Your account no longer exists. Please sign up again.
+            </div>
+          )}
           <Suspense fallback={<div>Loading...</div>}>
             <LoginForm />
           </Suspense>

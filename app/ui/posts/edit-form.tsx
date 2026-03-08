@@ -63,11 +63,22 @@ export default function EditPostForm({ post }: EditPostFormProps) {
     updatePostWithId,
     undefined
   );
-
   const handleRemoveImage = (indexToRemove: number) => {
     setImageUrls(prev => prev.filter((_, i) => i !== indexToRemove));
   };
-
+  const handleDelete = async (e: React.MouseEvent) => {
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      e.preventDefault();
+      return;
+    }
+    // If confirmed, navigate to the delete route
+    // We'll use a form to POST, or you can use fetch
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/dashboard/posts/${post.slug}/delete`;
+    document.body.appendChild(form);
+    form.submit();
+  };
   return (
     <form action={formAction} className="space-y-6">
       <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -88,7 +99,6 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
         </div>
-
         {/* Image Upload */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -120,7 +130,6 @@ export default function EditPostForm({ post }: EditPostFormProps) {
                 ))}
               </div>
             )}
-
             {/* Upload new images – styled button */}
             <div className="flex items-center justify-center w-full">
               <UploadButton<typeof ourFileRouter, 'postImageUploader'>
@@ -154,7 +163,6 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             </div>
           </div>
         </div>
-
         {/* Content */}
         <div className="mb-5">
           <label
@@ -172,14 +180,12 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors font-mono text-sm"
           />
         </div>
-
         {errorMessage && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
           </div>
         )}
       </div>
-
       {/* Form Actions */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -198,9 +204,8 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             {isPending ? 'Saving...' : 'Update Post'}
           </Button>
         </div>
-
         {/* Delete Post Button */}
-        <form action={deletePost.bind(null, post.slug)}>
+        {/* <form action={deletePost.bind(null, post.slug)}>
           <button
             type="submit"
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
@@ -213,7 +218,14 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             <TrashIcon className="w-4 h-4" />
             Delete Post
           </button>
-        </form>
+        </form> */}
+          <button
+            onClick={handleDelete}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+          >
+            <TrashIcon className="w-4 h-4" />
+            Delete Post
+          </button>
       </div>
     </form>
   );

@@ -124,9 +124,21 @@ export const authOptions = {
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
-          if (!user) return null;
+          if (!user) {
+            throw new Error('User not found, please signup first'); // 👈 specific error dangarous to let them now if the email is exist or not
+            //return null
+          };
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            if (!passwordsMatch) {
+              throw new Error('Invalid password'); // 👈 specific error
+            }
+            // ✅ Add this check
+            if (!user.email_verified) {
+              throw new Error('Please verify your email before logging in.');
+            }
+            return user;
+          }
         }
         return null;
       },
