@@ -14,12 +14,10 @@ import {
 import PostsTable from '@/app/ui/posts/table';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Posts',
 };
-
 export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
@@ -33,14 +31,11 @@ export default async function Page(props: {
   const currentPage = Number(searchParams?.page) || 1;
   const deleted = searchParams?.deleted;
   const error = searchParams?.error;
-  
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   const isAdmin = session?.user?.role === 'admin';
-
   let totalPages: number;
   let posts: any[];
-
   if (isAdmin) {
     // Admin sees all posts
     totalPages = await fetchPostsPages(query);
@@ -55,7 +50,6 @@ export default async function Page(props: {
       posts = await fetchFilteredPostsByUser(userId, query, currentPage);
     }
   }
-
   return (
     <div className="w-full">
       {deleted && (

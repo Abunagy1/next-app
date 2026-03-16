@@ -10,18 +10,15 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect('/login');
-
   const users = await sql<ProfileUser[]>`
     SELECT id, name, email, image, email_verified, phone, city, about, birth_date, role
     FROM users
     WHERE id = ${session.user.id}
   `;
   const user = users[0];
-
   if (!user) {
     // User no longer exists – redirect to sign-out page to clear session
     redirect('/auth/signout?reason=deleted');
   }
-
   return <ProfileView user={user} />;
 }

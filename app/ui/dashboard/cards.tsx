@@ -6,14 +6,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
-
 const iconMap = {
   collected: BanknotesIcon,
   customers: UserGroupIcon,
   pending: ClockIcon,
   invoices: InboxIcon,
 };
-
 export default async function CardWrapper() {
   const {
     numberOfInvoices,
@@ -21,7 +19,6 @@ export default async function CardWrapper() {
     totalPaidInvoices,
     totalPendingInvoices,
   } = await fetchCardData();
-
   return (
     <>
       <Card title="Collected" value={totalPaidInvoices} type="collected" />
@@ -31,7 +28,6 @@ export default async function CardWrapper() {
     </>
   );
 }
-
 export function Card({
   title,
   value,
@@ -42,7 +38,6 @@ export function Card({
   type: 'invoices' | 'customers' | 'pending' | 'collected';
 }) {
   const Icon = iconMap[type];
-
   return (
     <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">

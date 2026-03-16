@@ -7,30 +7,25 @@ import { AtSymbolIcon, KeyIcon, ExclamationCircleIcon } from '@heroicons/react/2
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
 import Link from 'next/link';
-
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
-
     const result = await signIn('credentials', {
       email,
       password,
       redirect: false,
       callbackUrl,
     });
-
     // if (result?.error) {
     //   setError(result.error);
     //   setLoading(false);
@@ -57,7 +52,6 @@ export default function LoginForm() {
       router.push(result?.url || callbackUrl);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <h1 className={`${lusitana.className} text-2xl text-gray-900 dark:text-white text-center`}>

@@ -35,11 +35,9 @@ import Stripe from 'stripe';
 import { getUserCustomerIds } from './data';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-import { signIn } from '@/auth'; // Import directly from your auth config
-// import { signIn, signOut, auth } from '@/auth'; // we'll sign them in after registration
+import { signIn, signOut, auth } from '@/auth'; // we'll sign them in after registration
 // import { AuthError } from 'next-auth';
 //import { sql } from '@vercel/postgres';
-//import { redirect } from 'next/navigation';
 // ... existing imports and code
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import bcrypt from 'bcryptjs';
@@ -848,8 +846,7 @@ export async function deleteUser(prevState: string | undefined, formData: FormDa
 }
 // ---------- Sign Out ----------
 export async function signOutAction() {
-  const { signOut } = await import('@/auth');
-  await signOut({ redirectTo: '/' });
+  redirect('/auth/signout');
 }
 
 async function ensureProductsDir() {
