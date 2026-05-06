@@ -44,3 +44,4 @@ page.tsx is a special Next.js file that exports a React component, and it's requ
 To create a nested route, you can nest folders inside each other and add page.tsx files inside each one of them. For example:
 ![alt text](image-1.png) --> /app/dashboard/page.tsx is associated with the /dashboard path.
 Diagram showing how adding a folder called dashboard creates a new route '/dashboard'
+Not completed yet feature for api
