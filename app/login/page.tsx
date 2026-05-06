@@ -9,7 +9,6 @@ export default async function LoginPage({
     searchParams?: Promise<{ registered?: string; verified?: string; reset?: string; error?: string; deleted?: string }>;
 }) {
   const params = await searchParams || {};
-
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md">

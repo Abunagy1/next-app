@@ -135,7 +135,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
               <UploadButton<typeof ourFileRouter, 'postImageUploader'>
                 endpoint="postImageUploader"
                 onClientUploadComplete={(res) => {
-                  const urls = res?.map((file) => file.ufsUrl) || [];
+                  const urls = res?.map((file) => file.url) || [];
                   setImageUrls(prev => [...prev, ...urls]);
                 }}
                 onUploadError={(error: Error) => {

@@ -1,24 +1,4 @@
 
-// if you want to switch to Resend, uncomment this code and make sure to set RESEND_API_KEY in your .env file. You can get a free API key by signing up at https://resend.com. Resend is a great service for sending transactional emails and is very easy to integrate with Next.js.
-//import nodemailer from 'nodemailer';
-// import { Resend } from 'resend';
-// const resend = new Resend(process.env.RESEND_API_KEY);
-// export async function sendVerificationEmail(email: string, token: string) {
-//   console.log('📨 Inside sendVerificationEmail, sending to:', email);
-//   try {
-//     const result = await resend.emails.send({
-//       from: 'onboarding@resend.dev',
-//       to: email,
-//       subject: 'Verify your email',
-//       html: `<a href="${process.env.NEXTAUTH_URL}/api/auth/verify?token=${token}">Verify</a>`,
-//     });
-//     console.log('✅ Resend API response:', result);
-//     return result;
-//   } catch (error) {
-//     console.error('❌ Resend API error:', error);
-//     throw error; // re-throw so the caller can catch it
-//   }
-// }
 import nodemailer from 'nodemailer';
 // Create a transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -58,7 +38,6 @@ export async function sendPasswordResetEmail(email: string, token: string) {
       pass: process.env.MAIL_PASSWORD,
     },
   });
-
   const info = await transporter.sendMail({
     from: `"Your App" <${process.env.MAIL_ID}>`,
     to: email,
@@ -73,7 +52,6 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   });
   console.log('✅ Password reset email sent. Message ID:', info.messageId);
 }
-
 export async function sendPurchaseConfirmation(email: string, details: any) {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -98,41 +76,7 @@ export async function sendPurchaseConfirmation(email: string, details: any) {
   });
   console.log('✅ Purchase confirmation email sent:', info.messageId);
 }
-// OR If you don't have a Resend key yet, you can temporarily switch back to Ethereal (which worked earlier) by reverting app/lib/email.ts:
-// const transporter = nodemailer.createTransport({
-//   host: 'smtp.ethereal.email',
-//   port: 587,
-//   auth: {
-//     user: process.env.ETHEREAL_USER || '',
-//     pass: process.env.ETHEREAL_PASS || '',
-//   },
-// });
-// export async function sendVerificationEmail(email: string, token: string) {
-//   const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify?token=${token}`;
-//   try {
-//     const info = await transporter.sendMail({
-//       from: '"Your App" <noreply@yourapp.com>',
-//       to: email,
-//       subject: 'Verify your email address',
-//       html: `
-//         <p>Hello,</p>
-//         <p>Please verify your email by clicking the link below:</p>
-//         <a href="${verificationUrl}">${verificationUrl}</a>
-//         <p>This link expires in 24 hours.</p>
-//       `,
-//     });
-//     console.log('✅ Email sent. Preview URL:', nodemailer.getTestMessageUrl(info));
-//     return info;
-//   } catch (error) {
-//     console.error('❌ Failed to send email:', error);
-//     throw error;
-//   }
-// }
-
 export async function sendContactEmails(name: string, userEmail: string, message: string) {
-  // console.log('📨 sendContactEmails called with:', { name, userEmail, messageLength: message.length });
-  // console.log('MAIL_ID exists:', !!process.env.MAIL_ID);
-  // console.log('MAIL_PASSWORD exists:', !!process.env.MAIL_PASSWORD);
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,

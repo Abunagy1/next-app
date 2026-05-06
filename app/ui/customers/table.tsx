@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import { FormattedCustomersTable } from '@/app/lib/definitions';
-
 export default async function CustomersTable({
   customers,
 }: {

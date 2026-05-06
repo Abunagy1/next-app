@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import ContactForm from '@/app/ui/contact-form';
 import AcmeLogo from '@/app/ui/acme-logo';
-
 export default function ContactPage() {
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">

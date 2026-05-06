@@ -1,12 +1,20 @@
 'use client';
+
 import { UploadButton } from "@uploadthing/react";
-import type { ourFileRouter } from "@/app/api/uploadthing/core";
-export function AvatarUpload({ onUploadComplete }: { onUploadComplete: (url: string) => void }) {
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
+
+interface AvatarUploadProps {
+  onUploadComplete: (url: string) => void;
+}
+
+export function AvatarUpload({ onUploadComplete }: AvatarUploadProps) {
   return (
-    <UploadButton<typeof ourFileRouter, "avatarUploader">
+    <UploadButton<OurFileRouter, "avatarUploader">
       endpoint="avatarUploader"
       onClientUploadComplete={(res) => {
-        if (res && res[0]) onUploadComplete(res[0].url);
+        if (res && res[0]) {
+          onUploadComplete(res[0].url); // ✅ use file.url
+        }
       }}
       onUploadError={(error: Error) => {
         alert(`ERROR! ${error.message}`);

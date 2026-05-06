@@ -59,7 +59,7 @@ export default async function Page(props: {
       )}
       {error === 'unauthorized' && (
         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
-          You don't have permission to delete this post.
+          You don&apos;t have permission to delete this post.
         </div>
       )}
       {error === 'notfound' && (

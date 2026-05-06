@@ -1,0 +1,26 @@
+{
+  "dev": {
+    "driver": "pg",
+    "host": { "ENV": "DEV_DB_HOST" },
+    "port": { "ENV": "DEV_DB_PORT" },
+    "database": { "ENV": "DEV_DB_NAME" },
+    "username": { "ENV": "DEV_DB_USER" },
+    "password": { "ENV": "DEV_DB_PASSWORD" },
+    "multipleStatements": true
+  },
+  "test": {
+    "driver": "pg",
+    "host": { "ENV": "TEST_DB_HOST" },
+    "port": { "ENV": "TEST_DB_PORT" },
+    "database": { "ENV": "TEST_DB_NAME" },
+    "username": { "ENV": "TEST_DB_USER" },
+    "password": { "ENV": "TEST_DB_PASSWORD" },
+    "multipleStatements": true
+  },
+  "prod": {
+    "driver": "pg",
+    "url": { "ENV": "POSTGRES_URL" },
+    "multipleStatements": true,
+    "ssl": true
+  }
+}

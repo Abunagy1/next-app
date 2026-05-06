@@ -1,9 +1,8 @@
 'use client';
 import { useActionState } from 'react';
-import { updateUserRole, deleteUser } from '@/app/lib/actions';
+import { updateUserRole, deleteUser } from '@/app/lib/actions/admin-actions';
 import { Button } from '@/app/ui/button';
 import { User } from '@/app/lib/definitions';
-
 export default function AdminUserTable({ users }: { users: User[] }) {
   return (
     <div className="overflow-x-auto">
@@ -42,10 +41,8 @@ export default function AdminUserTable({ users }: { users: User[] }) {
     </div>
   );
 }
-
 function RoleSelect({ userId, currentRole }: { userId: string; currentRole: string }) {
   const [state, formAction] = useActionState(updateUserRole, undefined);
-
   return (
     <form action={formAction} className="flex items-center space-x-2">
       <input type="hidden" name="userId" value={userId} />
@@ -67,10 +64,8 @@ function RoleSelect({ userId, currentRole }: { userId: string; currentRole: stri
     </form>
   );
 }
-
 function DeleteUser({ userId }: { userId: string }) {
   const [state, formAction] = useActionState(deleteUser, undefined);
-
   return (
     <form action={formAction}>
       <input type="hidden" name="userId" value={userId} />

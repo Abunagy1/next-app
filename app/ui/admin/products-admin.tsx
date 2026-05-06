@@ -22,10 +22,9 @@ export default function AdminProducts({ products: initialProducts }: { products:
   return (
     <div>
       <AddProductForm onProductAdded={(newProduct) => setProducts([...products, newProduct])} />
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {products.map(product => (
-          <div key={product.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow">
+          <div key={product.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow dark:border-gray-700">
             <div className="relative h-40 w-full mb-2">
               <Image
                 src={`/products/${product.image}`}
@@ -35,9 +34,9 @@ export default function AdminProducts({ products: initialProducts }: { products:
                 className="object-contain"
               />
             </div>
-            <h3 className="text-lg font-semibold">{product.name}</h3>
-            <p className="text-gray-600 dark:text-gray-300">${product.price}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{product.type}</p>
+              <h3 className="text-lg font-semibold dark:text-white">{product.name}</h3>
+              <p className="text-gray-600 dark:text-gray-300">${product.price}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{product.type}</p>
             <div className="flex space-x-2">
               <button
                 onClick={() => handleEdit(product)}
@@ -105,7 +104,7 @@ function AddProductForm({ onProductAdded }: { onProductAdded: (product: Product)
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="p-2 border rounded dark:bg-gray-800"
+          className="p-2 border rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
         />
         <input
           type="number"
@@ -114,12 +113,12 @@ function AddProductForm({ onProductAdded }: { onProductAdded: (product: Product)
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           required
-          className="p-2 border rounded dark:bg-gray-800"
+          className="p-2 border rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
         />
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="p-2 border rounded dark:bg-gray-800"
+          className="p-2 border rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white"
         >
           <option>vegetables</option>
           <option>meat</option>

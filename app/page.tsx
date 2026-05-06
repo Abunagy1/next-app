@@ -7,6 +7,7 @@ import { lusitana } from './ui/fonts';
 import Image from 'next/image';
 import { getSortedPostsData } from '@/app/lib/posts';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { Plane, Building2, BookText, ShoppingBag } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 export default async function Page() {
   //const session = await auth();
@@ -16,8 +17,7 @@ export default async function Page() {
   return (
     <main className="min-h-screen">
       {/* Hero Section with Gradient Background */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20 mix-blend-multiply" />
+      <section className="relative bg-gray-900 dark:bg-black text-white overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             {/* Left Content */}
@@ -33,13 +33,13 @@ export default async function Page() {
                 {!session ? (
                   <>
                     <Link
-                      href="/register"
+                      href="/user/signup"
                       className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
                     >
                       Get Started <ArrowRightIcon className="w-5 h-5" />
                     </Link>
                     <Link
-                      href="/login"
+                      href="/user/login"
                       className="inline-flex items-center justify-center gap-2 bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 hover:scale-105 transition-all duration-200"
                     >
                       Log In
@@ -92,7 +92,60 @@ export default async function Page() {
               priority
             />
           </div>
+      </div>
+      {/* Services Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50 dark:bg-gray-800 rounded-3xl my-12">
+        <div className="text-center mb-12">
+          <h2 className={`${lusitana.className} text-3xl font-bold text-gray-900 dark:text-white`}>
+            Our Services
+          </h2>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Explore our range of travel and lifestyle services.
+          </p>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <Link href="/flights" className="group p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <Plane className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Find Flights</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Search and book flights to your favorite destinations.
+            </p>
+          </Link>
+
+          <Link href="/hotels" className="group p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Find Hotels</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Discover and book stays at the best hotels worldwide.
+            </p>
+          </Link>
+
+          <Link href="/blog" className="group p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
+              <BookText className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Our Blog</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Read our latest travel tips and stories.
+            </p>
+          </Link>
+
+          <Link href="/store" className="group p-6 bg-white dark:bg-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Store</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Shop for premium travel gear and accessories.
+            </p>
+          </Link>
+        </div>
+      </section>
+      
       {/* Recent Posts Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
@@ -148,7 +201,6 @@ export default async function Page() {
             No posts yet. Check back soon!
           </p>
         )}
-
         <div className="text-center mt-12">
           <Link
             href="/blog"
@@ -158,13 +210,6 @@ export default async function Page() {
           </Link>
         </div>
       </section>
-
-      {/* Optional Footer Section */}
-      <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 dark:text-gray-400">
-          <p>&copy; {new Date().getFullYear()} NAGY. All rights reserved.</p>
-        </div>
-      </footer>
     </main>
   );
 }

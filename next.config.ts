@@ -9,7 +9,9 @@
 // next.config.ts
 
 import type { NextConfig } from 'next';
+import { join, resolve } from 'path';
 
+const helperDirName = join(process.cwd(), 'app/lib/email', 'helpersHbs');
 // const nextConfig: NextConfig = {
 //   reactStrictMode: true,
 //   // swcMinify is no longer needed – it's enabled by default in Next.js 15+
@@ -17,10 +19,24 @@ import type { NextConfig } from 'next';
 //   // If you need to ignore ESLint during builds, use:
 //   // eslint: { ignoreDuringBuilds: true } // But this is also deprecated; better to fix ESLint separately
 // };
-
-
-
 const nextConfig: NextConfig = {
+  webpack: (config, { isServer: _isServer }) => {
+    config.module.rules.push({
+      test: /\.hbs$/,
+      use: [
+        {
+          loader: 'handlebars-loader',
+          options: {
+            strict: true,
+            noEscape: true,
+            helperDirs: [resolve(helperDirName)],
+          },
+        },
+      ],
+    });
+    return config;
+  },
+
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -32,12 +48,45 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.ufs.sh',        // ✅ This wildcard covers your subdomain and any future ones
+        hostname: '*.ufs.sh',
+        port: '',
+        pathname: '/**',
+      },
+      // Add the following for Pexels images
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        port: '',
+        pathname: '/**',
+      },
+      // ADD THIS BLOCK
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
         port: '',
         pathname: '/**',
       },
     ],
   },
+  
+  turbopack: {
+    rules: {
+      '*.hbs': {
+        loaders: [
+          {
+            loader: 'handlebars-loader',
+            options: {
+              strict: true,
+              noEscape: true,
+              helperDirs: [resolve(helperDirName)],
+            },
+          },
+        ],
+        as: '*.js',   // ← required: output JavaScript
+      },
+    },
+  },
+
 };
 
 export default nextConfig;

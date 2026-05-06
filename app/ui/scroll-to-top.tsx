@@ -1,11 +1,8 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
-
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
-
   // Show button when page is scrolled down
   useEffect(() => {
     const toggleVisibility = () => {
@@ -15,18 +12,15 @@ export default function ScrollToTop() {
         setIsVisible(false);
       }
     };
-
     window.addEventListener('scroll', toggleVisibility);
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
-
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
   };
-
   return (
     <button
       onClick={scrollToTop}

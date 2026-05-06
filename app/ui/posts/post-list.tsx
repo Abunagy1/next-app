@@ -5,13 +5,11 @@ import Image from 'next/image';
 import DateComponent from '@/components/date';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Post } from '@/app/lib/definitions'; // ✅ full type with content & images
-
 export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPosts: Post[]; isLoggedIn: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
   const filteredPosts = initialPosts.filter(post =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   if (initialPosts.length === 0) {
     return (
       <section className="text-center py-16">
@@ -32,7 +30,6 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
       </section>
     );
   }
-
   return (
     <section>
       {/* Search Bar */}
@@ -46,7 +43,6 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
           className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => {
@@ -67,7 +63,6 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
                   </div>
                 )}
               </div>
-
               {/* Content */}
               <div className="p-6 flex-1 flex flex-col">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
@@ -88,7 +83,6 @@ export default function BlogPostList({ initialPosts, isLoggedIn }: { initialPost
           );
         })}
       </div>
-
       {filteredPosts.length === 0 && (
         <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
           No posts match your search.

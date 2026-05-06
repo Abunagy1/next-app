@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext", // or "NodeNext" but ESNext works better with ts-node
+    "moduleResolution": "bundler", // or "node" – both allow extensionless imports
+    "outDir": "./dist-scripts",
+    "noEmit": false,
+    "isolatedModules": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true // optional, speeds up execution
+  },
+  "include": ["scripts/**/*.ts"]
+}

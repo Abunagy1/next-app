@@ -4,7 +4,6 @@ Navigate to the <Pagination/> component and import the usePathname and useSearch
 We will use this to get the current page and set the new page. Make sure to also uncomment the code in this component.
 Your application will break temporarily as you haven't implemented the <Pagination/>
 */
-
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -28,29 +27,23 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
     return `${pathname}?${params.toString()}`;
   };
   // NOTE: Uncomment this code in Chapter 11
-
   const allPages = generatePagination(currentPage, totalPages);
-
   return (
     <>
       {/*  NOTE: Uncomment this code in Chapter 11 */}
-
       <div className="inline-flex">
         <PaginationArrow
           direction="left"
           href={createPageURL(currentPage - 1)}
           isDisabled={currentPage <= 1}
         />
-
         <div className="flex -space-x-px">
           {allPages.map((page, index) => {
             let position: 'first' | 'last' | 'single' | 'middle' | undefined;
-
             if (index === 0) position = 'first';
             if (index === allPages.length - 1) position = 'last';
             if (allPages.length === 1) position = 'single';
             if (page === '...') position = 'middle';
-
             return (
               <PaginationNumber
                 key={`${page}-${index}`}
@@ -62,7 +55,6 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
             );
           })}
         </div>
-
         <PaginationArrow
           direction="right"
           href={createPageURL(currentPage + 1)}
@@ -72,7 +64,6 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
     </>
   );
 }
-
 function PaginationNumber({
   page,
   href,
@@ -94,7 +85,6 @@ function PaginationNumber({
       'text-gray-700 dark:text-gray-300': position === 'middle',
     },
   );
-
   return isActive || position === 'middle' ? (
     <div className={className}>{page}</div>
   ) : (
@@ -103,7 +93,6 @@ function PaginationNumber({
     </Link>
   );
 }
-
 function PaginationArrow({
   href,
   direction,
@@ -122,14 +111,12 @@ function PaginationArrow({
       'ml-2 md:ml-4': direction === 'right',
     },
   );
-
   const icon =
     direction === 'left' ? (
       <ArrowLeftIcon className="w-4" />
     ) : (
       <ArrowRightIcon className="w-4" />
     );
-
   return isDisabled ? (
     <div className={className}>{icon}</div>
   ) : (

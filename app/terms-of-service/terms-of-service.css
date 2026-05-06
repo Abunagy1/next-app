@@ -1,0 +1,47 @@
+#terms-of-service-container h1,
+#terms-of-service-container h2,
+#terms-of-service-container h3 {
+  font-weight: bold;
+}
+
+#terms-of-service-container * {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+#terms-of-service-container h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+#terms-of-service-container h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+#terms-of-service-container h3 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+#terms-of-service-container h1~h2,
+#terms-of-service-container h1~* {
+  text-indent: 1rem;
+}
+
+#terms-of-service-container h2~* {
+  text-indent: 2rem;
+}
+
+#terms-of-service-container h3~ol {
+  text-indent: 3rem;
+}
+
+#terms-of-service-container li::before {
+  content: "-";
+  margin-right: 8px;
+}
+
+#terms-of-service-container li>ol {
+  padding-left: 1.25rem;
+}

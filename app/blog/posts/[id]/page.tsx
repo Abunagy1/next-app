@@ -1,4 +1,5 @@
-import Head from 'next/head';
+//import Head from 'next/head';
+// ❌ REMOVE: import Head from 'next/head';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -6,21 +7,17 @@ import Layout from '@/components/layout';
 import Date from '@/components/date';
 import utilStyles from '@/styles/utils.module.css';
 import Link from 'next/link';
-//import { auth } from '@/auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { getAllPostIds, getPostData, getSortedPostsData } from '@/app/lib/posts';
 import { PencilIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { getUserById } from '@/app/lib/data'; // add import
+import CommentsSection from '@/app/ui/posts/comments-section';
+import PostReactions from '@/app/ui/posts/post-reactions';
 export const dynamic = 'force-dynamic';
 type Props = {
   params: Promise<{ id: string }>;
 };
-
-/*
-For the blog post page, you have generateStaticParams. Adding dynamic = 'force-dynamic' will make the page render dynamically,
-but it will still generate the paths. If you need truly static blog posts without authentication, remove the auth() usage from that page.
-*/
 export async function generateStaticParams() {
   const paths = await getAllPostIds();
   return paths.map((path) => ({ id: path.params.id }));
@@ -58,10 +55,11 @@ export default async function Post({ params }: Props) {
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
   return (
-    <Layout backHref={backLink} backLabel={backLabel} authorImage={user?.image}>
-      <Head>
+    <Layout backHref={backLink} backLabel={backLabel} authorImage={user?.image} authorId={postData.user_id} authorName={user?.name || 'Author'}>
+      {/* ❌ REMOVE the commented <Head> block entirely */}
+      {/* <Head>
         <title>{postData.title}</title>
-      </Head>
+      </Head> */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with title and edit button */}
         <header className="mb-8">
@@ -105,6 +103,8 @@ export default async function Post({ params }: Props) {
           className="prose prose-lg dark:prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
         />
+        <PostReactions postSlug={id} />
+        <CommentsSection postSlug={id} />
         {/* Navigation between posts */}
         <nav className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex justify-between">
           {prevPost ? (

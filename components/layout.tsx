@@ -1,51 +1,62 @@
-// Layout component  will be shared across all pages and reshape the layout for your site main page
+// Layout component will be shared across all pages and reshape the layout for your site main page
 'use client';
+
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
 import styles from './layout.module.css';
 import utilStyles from '../styles/utils.module.css';
-//import utilStyles from '@/styles/utils.module.css';
 import Link from 'next/link';
 import { clsx } from 'clsx';
+
 const name = 'The Blog';
-/*  
-The components/layout.tsx is a custom layout used by your blog pages (imported in app/blog/posts/[id]/page.tsx and app/blog/page.tsx).
-It displays a header with a profile image and navigation.
-*/
+
 type LayoutProps = {
   children: React.ReactNode;
   home?: boolean;
-  backHref?: string; // new optional prop
-  backLabel?: string; // new prop for custom link text
-  authorImage?: string | null; // new optional prop
+  backHref?: string;
+  backLabel?: string;
+  authorImage?: string | null;
+  authorId?: string;
+  authorName?: string;
 };
-export const siteTitle = 'Next.js Daynamic Website';
-export function Alert({ children, type }) {
-    return (
-        <div
-            className={clsx({
-                [styles.success]: type === 'success',
-                [styles.error]: type === 'error',
-            })}
-        >
-            {children}
-        </div>
-    );
+
+export const siteTitle = 'Next.js Dynamic Website';
+
+export function Alert({ children, type }: { children: React.ReactNode; type: 'success' | 'error' }) {
+  return (
+    <div
+      className={clsx({
+        [styles.success]: type === 'success',
+        [styles.error]: type === 'error',
+      })}
+    >
+      {children}
+    </div>
+  );
 }
-export default function Layout({ children, home, backHref, backLabel = "Back to home", authorImage }: LayoutProps) {
+
+export default function Layout({
+  children,
+  home,
+  backHref,
+  backLabel = 'Back to home',
+  authorImage,
+  authorId,        // 👈 add this
+  authorName,
+}: LayoutProps) {
   const [error, setError] = useState(false);
-    // Use authorImage if provided (and not errored), otherwise fallback to default
   const imageSrc = error ? '/default-avatar.png' : (authorImage || '/blog/blog.jpg');
+
   return (
     <div className={styles.container}>
       <Head>
         <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content="a personal website build using Next.js" />
         <meta
-          name="description"
-          content="a personal website build using Next.js"
+          property="og:image"
+          content={`https://og-image.vercel.app/${encodeURIComponent(siteTitle)}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`}
         />
-        <meta property="og:image" content={`https://og-image.vercel.app/${encodeURI(siteTitle)}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`} />
         <meta name="og:title" content={siteTitle} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
@@ -60,26 +71,24 @@ export default function Layout({ children, home, backHref, backLabel = "Back to 
               width={144}
               alt="Blog header"
             />
-            <h1 className="mt-4 text-4xl font-bold text-gray-900 dark:text-white">
-              {name}
-            </h1>
+            <h1 className="mt-4 text-4xl font-bold text-gray-900 dark:text-white">{name}</h1>
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href={authorId ? `/user/profile/${authorId}` : '/'} className="flex items-center gap-3">
               <Image
                 priority
                 src={imageSrc}
                 className="rounded-full border-2 border-blue-500"
                 height={48}
                 width={48}
-                alt="Blog POST"
+                alt="Author"
+                onError={() => setError(true)}
               />
               <span className="text-xl font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                {name}
+                {authorName || name}
               </span>
             </Link>
-            {/* You could add other navigation items here if needed */}
           </div>
         )}
       </header>

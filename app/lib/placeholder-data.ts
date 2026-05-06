@@ -1,5 +1,49 @@
 // This file contains placeholder data that you'll be replacing with real data in the Data Fetching chapter:
 // https://nextjs.org/learn/dashboard-app/fetching-data
+// app/lib/placeholder-data.ts
+// const users = [
+//   {
+//     id: '410544b2-4001-4271-9855-fec4b6a6442a',
+//     name: 'Mohamed Nagy',
+//     email: 'postta@aol.com',
+//     password: process.env.DEFAULT_ADMIN_PASSWORD || '123456789',
+//     email_verified: true,
+//     email_verified_at: new Date().toISOString(),
+//     image: '/profiles/profile.jpg',
+//     phone: '+201112270141',
+//     city: 'New York',
+//     about: 'I am the admin user.',
+//     birth_date: '1979-08-22',
+//     role: 'admin',
+//     // New fields
+//     firstName: 'Mohamed',
+//     lastName: 'Nagy',
+//     coverImage: '/profiles/cover.jpg',
+//     phoneNumbers: [
+//       {
+//         number: '112270141',
+//         dialCode: '+20',
+//         primary: true,
+//         verifiedAt: null,
+//         inVerification: false,
+//       },
+//     ],
+//     emails: [
+//       {
+//         email: 'postta@aol.com',
+//         emailVerifiedAt: new Date().toISOString(),
+//         primary: true,
+//         inVerification: false,
+//       },
+//     ],
+//     address: '123 Main St, New York, NY',
+//     birth_date: '1979-08-22',
+//     customerId: null,
+//   },
+// ];
+// app/lib/placeholder-data.ts
+// app/lib/placeholder-data.ts
+
 const users = [
   {
     id: '410544b2-4001-4271-9855-fec4b6a6442a',
@@ -7,14 +51,36 @@ const users = [
     email: 'postta@aol.com',
     password: process.env.DEFAULT_ADMIN_PASSWORD || '123456789',
     email_verified: true,
+    email_verified_at: new Date().toISOString(),
     image: '/profiles/profile.jpg',
     phone: '+201112270141',
     city: 'New York',
     about: 'I am the admin user.',
     birth_date: '1979-08-22',
     role: 'admin',
+    // Old project fields
+    firstName: 'Mohamed',
+    lastName: 'Nagy',
+    coverImage: '/profiles/cover.jpg',
+    phoneNumbers: [
+      { number: '112270141', dialCode: '+20', primary: true, verifiedAt: null, inVerification: false },
+    ],
+    emails: [
+      { email: 'postta@aol.com', emailVerifiedAt: new Date().toISOString(), primary: true, inVerification: false },
+    ],
+    address: '123 Main St, New York, NY',
+    customerId: null,
+    // NEW: Required for unified schema
+    flights: {},
+    hotels: {},
+    rewardPoints: { totalPoints: 0, pointHistory: [] },
+    userSettings: {},
   },
+  // ... any other users should also have these fields
 ];
+
+// ... rest of file (customers, invoices, revenue, posts, products) unchanged
+
 // Helper to create a URL‑friendly slug
 function slugify(title: string): string {
   return title

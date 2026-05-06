@@ -13,12 +13,7 @@ such as CSS reset rules, site-wide styles for HTML elements like links, and more
 /* You can import global.css in any component in your application,
 but it's usually good practice to add it to your top-level component. In Next.js, this is the root layout.
 Add global styles to your application by navigating to /app/layout.tsx and importing the global.css file: */
-/* @import "tailwindcss";
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities"; */
-/* /app/ui/global.css */
-/* /app/ui/global.css */
+
 /* @import MUST BE AT THE TOP */
 
 @import "tailwindcss";
@@ -31,19 +26,19 @@ Add global styles to your application by navigating to /app/layout.tsx and impor
   --store-header-text: #000000; /* black for light mode */
 }
 
-/* Dark mode variables – applied when <html> has class "dark" */
+/* Dark mode variables – applied when <html> has class "dark" via next-themes */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --store-bg: #1f2937;  /* gray-800 (dark mode) */
+  --background: #0a0a0a; /* You can Swap it to #1f2937 a standard dark gray (gray-800) instead of harsh pitch black */
+  --foreground: #ededed; /* you can use #f9fafb gray-50 */
+  --store-bg: #1f2937;  /* gray-800 (dark mode) You can use #111827; gray-900 (dark mode) */
   --store-header-text: #ffffff; /* white for dark mode */
 }
 
 body {
-  background: var(--background);
+  background: var(--background); /* white for dark mode */
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s, color 0.3s; /* white for dark mode */
   /* smooth transition */
 }
 
@@ -53,9 +48,19 @@ textarea,
 select {
   background-color: var(--background);
   color: var(--foreground);
-  border-color: #ccc;
+  border-color: #ccc; /* You can use #d1d5db --> gray-300 */
+
   /* optional, you can adjust */
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
+/* 
+.dark input,
+.dark textarea,
+.dark select {
+  border-color: #4b5563;
+}
+    /* gray-600 - Prevents bright borders in dark mode */
+
 
 input[type='number'] {
   -moz-appearance: textfield;
@@ -66,4 +71,8 @@ input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+button.filter-reset-text {
+  color: #4b5563 !important;
 }

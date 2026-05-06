@@ -1,23 +1,27 @@
-import postgres from 'postgres';
-//import ProductsClient from '../ui/store/products';
+// app/store/page.tsx
 import ProductsClient from '@/app/ui/store/products';
-/* 
-or if you want to Use a Dynamic Import with ssr: false
-import dynamic from 'next/dynamic';
-const ProductsClient = dynamic(
-  () => import('@/app/ui/store/products'),
-  { ssr: false }
-);
- */
 import { Product } from '@/app/lib/definitions';
+import { sql, dbType, connectDB } from '@/app/lib/db/index';
+import ProductModel from '@/app/lib/db/models/Product';
 export const dynamic = 'force-dynamic';
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export default async function StorePage() {
-  const rows = await sql<Product[]>`SELECT * FROM products ORDER BY name`;
-  // Convert price to number (Postgres returns numeric as string by default)
-  const productsArray = rows.map(row => ({
-    ...row,
-    price: typeof row.price === 'number' ? row.price : Number(row.price)
-  }));
+  let productsArray: Product[];
+  if (dbType === 'postgres') {
+    const rows = await sql<Product[]>`SELECT * FROM products ORDER BY name`;
+    productsArray = rows.map((row: { id: string; name: string; price: number; image: string; type: string }) => ({
+      ...row,
+      price: typeof row.price === 'number' ? row.price : Number(row.price)
+    }));
+  } else {
+    await connectDB();
+    const docs = await ProductModel.find().sort('name').lean();
+    productsArray = docs.map((doc: { _id: any; name: string; price: number; image: string; type: string }) => ({
+      id: doc._id.toString(),
+      name: doc.name,
+      price: doc.price,
+      image: doc.image,
+      type: doc.type,
+    }));
+  }
   return <ProductsClient initialProducts={productsArray} />;
 }

@@ -3,10 +3,8 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchLatestInvoices } from '@/app/lib/data';
-
 export default async function LatestInvoices({ userCustomerIds }: { userCustomerIds?: string[] }) {
   const latestInvoices = await fetchLatestInvoices(userCustomerIds);
-
   if (latestInvoices.length === 0) {
     return (
       <div className="flex w-full flex-col md:col-span-4">
@@ -19,7 +17,6 @@ export default async function LatestInvoices({ userCustomerIds }: { userCustomer
       </div>
     );
   }
-
   // Render the invoices (same as before)
   return (
     <div className="flex w-full flex-col md:col-span-4">

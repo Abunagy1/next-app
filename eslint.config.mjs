@@ -16,6 +16,18 @@ export default defineConfig([
     ],
   },
   {
+    files: ["migrations/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+      },
+    },
+    rules: {
+      "no-console": "off",
+      "no-undef": "off",
+    },
+  },
+  {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     plugins: {
       react,

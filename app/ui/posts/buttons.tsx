@@ -2,7 +2,6 @@
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deletePost } from '@/app/lib/actions';
-
 export function CreatePost() {
   return (
     <Link
@@ -14,7 +13,6 @@ export function CreatePost() {
     </Link>
   );
 }
-
 export function UpdatePost({ id }: { id: string }) {
   return (
     <Link
@@ -25,7 +23,6 @@ export function UpdatePost({ id }: { id: string }) {
     </Link>
   );
 }
-
 export function DeletePost({ id }: { id: string }) {
   const deletePostWithId = deletePost.bind(null, id);
   return (

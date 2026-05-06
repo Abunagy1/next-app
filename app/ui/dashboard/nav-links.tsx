@@ -33,7 +33,7 @@ export default function NavLinks() {
     { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
     { name: isAdmin ? 'API' : 'My Services', href: isAdmin ? '/dashboard/api' : '/dashboard/services',  icon: UserGroupIcon },
     { name: 'Posts', href: '/dashboard/posts', icon: DocumentDuplicateIcon }, // new
-    { name: 'Profile', href: '/dashboard/profiles', icon: UserIcon },
+    { name: 'Profile', href: '/user/profile', icon: UserIcon },
   ];
   if (isAdmin) {
     links.push({ name: 'Admin', href: '/dashboard/admin', icon: ShieldCheckIcon });

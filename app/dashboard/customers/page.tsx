@@ -1,7 +1,6 @@
 //import { auth } from '@/auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-
 import { Suspense } from 'react';
 import Search from '@/app/ui/search';
 import CustomersTable from '@/app/ui/customers/table';
@@ -27,10 +26,6 @@ export default async function Page(props: {
   }
   // Fetch total pages for pagination
   const totalPages = await fetchCustomersPages(query, userCustomerIds, isAdmin);
-  // Fetch customers for the current page (you'll need to modify fetchFilteredCustomersForUser to accept offset/limit)
-  // We'll create a new version that includes pagination, or modify the existing one.
-  // For now, let's create a separate function: fetchFilteredCustomersForUserPaginated
-  // I'll provide that function below.
   const rawCustomers = await fetchFilteredCustomersForUserPaginated(
     query,
     currentPage,

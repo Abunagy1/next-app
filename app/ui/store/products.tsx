@@ -1,15 +1,14 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // add useMemo
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Product } from '@/app/lib/definitions';
 import styles from './products.module.css';
-// Separate component for each product card to manage its own error state
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const [imgError, setImgError] = useState(false);
-  const imageSrc = imgError 
-    ? '/products/placeholder.jpg' 
+  const imageSrc = imgError
+    ? '/products/placeholder.jpg'
     : `/products/${product.image}`;
   return (
     <div className={`${styles.productCard} ${styles[product.type] || ''}`}>
@@ -21,7 +20,7 @@ function ProductCard({ product }: { product: Product }) {
           alt={product.name}
           fill
           sizes="(max-width: 768px) 100vw, 280px"
-          priority={false}
+          priority={priority}
           onError={() => setImgError(true)}
         />
       </div>
@@ -37,10 +36,10 @@ function ProductCard({ product }: { product: Product }) {
 }
 export default function Products({ initialProducts }: { initialProducts: Product[] }) {
   const { data: session, status } = useSession();
-  const [filtered, setFiltered] = useState<Product[]>(initialProducts);
   const [category, setCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  useEffect(() => {
+  // Compute filtered products using useMemo
+  const filtered = useMemo(() => {
     let results = initialProducts;
     if (category !== 'All') {
       results = results.filter(p => p.type === category.toLowerCase());
@@ -49,7 +48,7 @@ export default function Products({ initialProducts }: { initialProducts: Product
       const term = searchTerm.toLowerCase().trim();
       results = results.filter(p => p.name.toLowerCase().includes(term));
     }
-    setFiltered(results);
+    return results;
   }, [category, searchTerm, initialProducts]);
 
   if (status === 'loading') {
@@ -85,11 +84,11 @@ export default function Products({ initialProducts }: { initialProducts: Product
           />
         </div>
       </div>
-      <div className={styles.productGrid}>
-        {filtered.map(product => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+        <div className={styles.productGrid}>
+          {filtered.map((product, index) => (
+            <ProductCard key={product.id} product={product} priority={index === 0} />
+          ))}
+        </div>
       {filtered.length === 0 && (
         <p style={{ textAlign: 'center', marginTop: '2rem', color: '#4b5563' }}>
           No products found.

@@ -1,4 +1,4 @@
-import { SessionProvider } from 'next-auth/react';
+//import { SessionProvider } from 'next-auth/react';
 import { Providers } from './providers';
 // This is called a root layout and is required in every Next.js application
 // this file name indicate that it creates and control the UI layout of the main home / route page
@@ -17,6 +17,9 @@ import Link from 'next/link';
 import HeaderNav from '@/app/ui/header-nav';
 import ScrollToTop from '@/app/ui/scroll-to-top';
 export const dynamic = 'force-dynamic'; // ← ADD THIS LINE
+import { Footer } from '@/components/sections/Footer';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import Script from 'next/script';
 export const metadata: Metadata = {
   title: {
     template: '%s | NAGY Dashboard',
@@ -31,24 +34,28 @@ children,
   children: React.ReactNode;
 }) {
   return ( // it return an html main page
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Inline script to set the correct theme before React hydrates,
             preventing a flash of incorrect colors. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                let theme = localStorage.getItem('theme');
-                if (!theme) {
-                  theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
-                if (theme === 'dark') document.documentElement.classList.add('dark');
-              } catch (e) {}
-            `,
-          }}
-        />
+          <Script
+            id="theme-script"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  try {
+                    var theme = localStorage.getItem('theme');
+                    if (!theme) {
+                      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                    if (theme === 'dark') document.documentElement.classList.add('dark');
+                  } catch (e) {}
+                })();
+              `,
+            }}
+          />
       </head>
       {/* add the Google fonts to the <body> element & the Tailwind antialiased class which smooths out the font, 
       By adding Inter to the <body> element, the font will be applied throughout your application */}
@@ -69,7 +76,9 @@ children,
                   <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
                     NAGY
                   </Link>
-                  <HeaderNav />
+                  <ErrorBoundary>
+                    <HeaderNav />
+                  </ErrorBoundary>
                 </div>
                 {/* theme toggle */}
                 <div className="mt-2 md:mt-0">
@@ -81,6 +90,7 @@ children,
           <main className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {children}
           </main>
+          <Footer />
           <ScrollToTop /> {/* ✅ Add this line */}
         </Providers>
       </body>

@@ -1,49 +1,72 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { createPaymentIntent, createStoreInvoice } from '@/app/lib/actions';
 import { Product } from '@/app/lib/definitions';
 import { RadioGroup } from '@headlessui/react';
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 type PaymentMethod = 'stripe' | 'bank_transfer' | 'ideal' | 'sepa_debit';
+
 export default function CheckoutForm({ product, user }: { product: Product; user?: any }) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bankDetails, setBankDetails] = useState<any>(null);
   const [error, setError] = useState('');
-  const handlePaymentMethodChange = async (method: PaymentMethod) => {
-    setPaymentMethod(method);
-    setClientSecret(null);
-    setBankDetails(null);
-    setError('');
-    const formData = new FormData();
-    formData.append('productId', product.id!.toString());
-    formData.append('quantity', '1');
-    formData.append('paymentMethod', method);
-    const data = await createPaymentIntent(formData);
-    if (!data) {
-      setError('No response from payment server');
-      return;
-    }
-    // Check for error first
-    if ('error' in data && data.error) {
-      setError(data.error);
-      return;
-    }
-    // Now data is the success union
-    if (data.paymentMethod === 'bank_transfer') {
-      setBankDetails(data.bankDetails);
-    } else {
-      // For stripe, ideal, sepa_debit – clientSecret must be present
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-      } else {
-        setError('Missing client secret');
+
+  const initialFetch = useRef(false);
+
+  const handlePaymentMethodChange = useCallback(
+    async (method: PaymentMethod) => {
+      setPaymentMethod(method);
+      setClientSecret(null);
+      setBankDetails(null);
+      setError('');
+      const formData = new FormData();
+      formData.append('productId', product.id!.toString());
+      formData.append('quantity', '1');
+      formData.append('paymentMethod', method);
+      const data = await createPaymentIntent(formData);
+      if (!data) {
+        setError('No response from payment server');
+        return;
       }
-    }
-  };
+      if ('error' in data && data.error) {
+        setError(data.error);
+        return;
+      }
+      if (data.paymentMethod === 'bank_transfer') {
+        setBankDetails(data.bankDetails);
+      } else {
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+        } else {
+          setError('Missing client secret');
+        }
+      }
+    },
+    [product.id]
+  );
+
+  // Trigger the default payment method on mount (delayed to avoid sync state update)
+  useEffect(() => {
+    if (initialFetch.current) return;
+    initialFetch.current = true;
+
+    (async () => {
+      try {
+        await handlePaymentMethodChange('stripe');
+      } catch (err) {
+        console.error('Initial payment method fetch failed:', err);
+        setError('Unable to load payment form. Please try another method.');
+      }
+    })();
+  }, [handlePaymentMethodChange]);
+
+  // ... keep the rest of the component (the JSX return) exactly as it was
+  
   return (
     <div className="max-w-2xl mx-auto">
       {/* Payment Method Selection */}

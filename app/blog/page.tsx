@@ -1,36 +1,33 @@
 import { Metadata } from 'next';
-import Head from 'next/head';
+// ❌ REMOVE: import Head from 'next/head';
 import Layout, { siteTitle } from '../../components/layout';
 import utilStyles from '../../styles/utils.module.css';
-//import { auth } from '@/auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { getPosts } from '../lib/posts';
 import BlogPostList from '../ui/posts/post-list';
 import Link from 'next/link';
 import { PlusIcon } from '@heroicons/react/24/outline';
+
 export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Next.js blog posts',
 };
+
 export default async function BlogPage() {
-  //const session = await auth();
   const session = await getServerSession(authOptions);
-  //const posts = await getPosts(session?.user?.id);
-  const posts = await getPosts(); // no argument → fetches all posts
+  const posts = await getPosts();
+
   return (
     <Layout home>
-      <Head>
-        <title>{siteTitle}</title>
-      </Head>
+      {/* ❌ REMOVE the entire <Head> block – metadata is handled by the export above */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          {/* <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Blog</h1> */}
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Thoughts, stories, and ideas worth sharing.
           </p>
-          {/* Create Post Button – only for logged-in users */}
           {session?.user && (
             <div className="mt-6">
               <Link

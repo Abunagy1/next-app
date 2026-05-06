@@ -1,28 +1,41 @@
-// Router Handler, app/query/route.ts, to query the database.
-import postgres from 'postgres';
-//import { sql } from '@vercel/postgres';
+// app/query/route.ts
 import { NextResponse } from 'next/server';
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+import { sql, dbType, connectDB } from '@/app/lib/db/index';
+import PostModel from '@/app/lib/db/models/Post';
+import InvoiceModel from '@/app/lib/db/models/Invoice';
 async function listInvoices() {
-	const data = await sql`
-    SELECT invoices.amount, customers.name
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE invoices.amount = 666;
-  `;
-	return data;
+  if (dbType === 'postgres') {
+    const data = await sql`
+      SELECT invoices.amount, customers.name
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      WHERE invoices.amount = 666;
+    `;
+    return data;
+  } else {
+    await connectDB();
+    const invoices = await InvoiceModel.find({ amount: 666 })
+      .populate('customer.id', 'name')
+      .lean();
+    return invoices.map(inv => ({
+      amount: inv.amount,
+      name: inv.customer.name,
+    }));
+  }
 }
 export async function GET() {
-//   return Response.json({
-//     message:
-//       'Uncomment this file and remove this line. You can delete this file when you are finished.',
-//   });
   try {
-    const rows = await sql`SELECT slug, title FROM posts`;
+    let rows;
+    if (dbType === 'postgres') {
+      rows = await sql`SELECT slug, title FROM posts`;
+    } else {
+      await connectDB();
+      const posts = await PostModel.find().lean();
+      rows = posts.map(p => ({ slug: p.slug, title: p.title }));
+    }
     const invoices = await listInvoices();
     return NextResponse.json({ rows, invoices });
-    //return Response.json(await listInvoices());
   } catch (error) {
-  	return Response.json({ error }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }

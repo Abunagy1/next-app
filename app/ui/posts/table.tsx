@@ -4,7 +4,6 @@ import { UpdatePost, DeletePost } from '@/app/ui/posts/buttons';
 import { formatDateToLocal } from '@/app/lib/utils';
 //import { fetchFilteredPosts } from '@/app/lib/data';
 import Link from 'next/link';
-
 // ✅ Receive posts as props
 export default function PostsTable({ posts }: { posts: any[] }) {
   //const posts = await fetchFilteredPosts(query, currentPage);
@@ -46,7 +45,6 @@ export default function PostsTable({ posts }: { posts: any[] }) {
               </div>
             ))}
           </div>
-
           {/* Desktop view with horizontal scroll if needed */}
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full text-gray-900 dark:text-gray-100 table-auto">

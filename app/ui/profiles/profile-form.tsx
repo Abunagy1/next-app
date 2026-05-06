@@ -1,6 +1,7 @@
 'use client';
 import { useActionState, useState } from 'react';
-import { updateProfile, deleteAccount } from '@/app/lib/actions';
+import { updateProfile } from '@/app/lib/actions';
+import { deleteAccountAction } from '@/app/lib/actions/deleteAccountAction';
 import { Button } from '@/app/ui/button';
 import { AvatarUpload } from '../upload-button';
 import Image from 'next/image';
@@ -8,7 +9,7 @@ import { ProfileUser } from '@/app/lib/definitions';
 export default function ProfileForm({ user }: { user: ProfileUser }) {
   const [avatarUrl, setAvatarUrl] = useState(user.image || '');
   const [updateState, updateAction, updatePending] = useActionState(updateProfile, undefined);
-  const [deleteState, deleteAction, deletePending] = useActionState(deleteAccount, undefined);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteAccountAction, undefined);
   return (
     <>
       <form action={updateAction} className="space-y-6">

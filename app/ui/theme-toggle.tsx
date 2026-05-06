@@ -1,62 +1,31 @@
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-
-// export default function ThemeToggle() {
-//   const [isDark, setIsDark] = useState(false);
-
-//   useEffect(() => {
-//     // Check local storage or system preference on mount
-//     const stored = localStorage.getItem('theme');
-//     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-//     const initial = stored === 'dark' || (!stored && prefersDark);
-//     setIsDark(initial);
-//     document.documentElement.classList.toggle('dark', initial);
-//   }, []);
-
-//   const toggleTheme = () => {
-//     const newDark = !isDark;
-//     setIsDark(newDark);
-//     document.documentElement.classList.toggle('dark', newDark);
-//     localStorage.setItem('theme', newDark ? 'dark' : 'light');
-//   };
-
-//   return (
-//     <button
-//       onClick={toggleTheme}
-//       className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-//       aria-label="Toggle theme"
-//     >
-//       {isDark ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-//     </button>
-//   );
-// }
 'use client';
+import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial = stored === 'dark' || (!stored && prefersDark);
-    setIsDark(initial);
-    document.documentElement.classList.toggle('dark', initial);
+    // We disable the rule for this specific line as it is the required Next.js hydration pattern
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
   }, []);
+  // Avoid hydration mismatch by rendering nothing (or a skeleton) until mounted
+  if (!mounted) {
+    return <div className="w-12 h-12 p-3" />; // Placeholder to prevent layout shift
+  }
+  // resolvedTheme catches the actual theme when "system" is selected
+  const currentTheme = theme === 'system' ? resolvedTheme : theme;
   const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    document.documentElement.classList.toggle('dark', newDark);
-    localStorage.setItem('theme', newDark ? 'dark' : 'light');
-  };
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
   return (
     <button
       onClick={toggleTheme}
       className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg hover:scale-110 transition-all duration-200 border border-gray-200 dark:border-gray-700"
       aria-label="Toggle theme"
     >
-      {isDark ? (
+      {currentTheme === 'dark' ? (
         <SunIcon className="w-6 h-6 text-yellow-500" />
       ) : (
         <MoonIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />

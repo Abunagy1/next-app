@@ -6,16 +6,13 @@ import { Button } from './button';
 import { useActionState } from 'react';
 import { signup } from '@/app/lib/actions';
 import Link from 'next/link';
-
 export default function SignupForm() {
   const [errorMessage, formAction, isPending] = useActionState(signup, undefined);
-
   return (
     <form action={formAction} className="space-y-6">
       <h1 className={`${lusitana.className} text-2xl text-gray-900 dark:text-white text-center`}>
         Create an account
       </h1>
-
       <div className="space-y-4">
         {/* Name */}
         <div>
@@ -34,7 +31,6 @@ export default function SignupForm() {
             <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
         </div>
-
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -52,7 +48,6 @@ export default function SignupForm() {
             <AtSymbolIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
         </div>
-
         {/* Password */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -71,7 +66,6 @@ export default function SignupForm() {
             <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
         </div>
-
         {/* Confirm Password */}
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -91,7 +85,6 @@ export default function SignupForm() {
           </div>
         </div>
       </div>
-
       <Button
         type="submit"
         className="w-full justify-center"
@@ -100,16 +93,14 @@ export default function SignupForm() {
         {isPending ? 'Creating account...' : 'Sign up'}
         <ArrowRightIcon className="ml-2 h-5 w-5" />
       </Button>
-
       {errorMessage && (
         <div className="flex items-center gap-2 text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
           <p>{errorMessage}</p>
         </div>
       )}
-
       <p className="text-center text-sm text-gray-600 dark:text-gray-400">
         Already have an account?{' '}
-        <Link href="/login" className="text-blue-600 hover:underline dark:text-blue-400">
+        <Link href="/user/login" className="text-blue-600 hover:underline dark:text-blue-400">
           Log in
         </Link>
       </p>
