@@ -940,10 +940,10 @@ for (const user of users) {
       UNIQUE (user_id, email)
     );
   `;
-
+  // comment them out when you eed the database or they will take ys to seed , just go to admin and use route 
   // After all table creation, populate flight and hotel data
-  // await seedFlightsPostgres();
-  // await seedHotelsPostgres();
+  await seedFlightsPostgres();
+  await seedHotelsPostgres();
 
   console.log('✅ PostgreSQL seeding complete.');
 }
