@@ -27,7 +27,7 @@ async function reset() {
     } else {
       console.log('⏭️ Skipping seed (NO_SEED=1).');
     }
-    console.log('✅ Reset complete (data cleared, no seed).');
+    console.log('✅ Reset completed (Seeded) successfully.');
   } catch (error) {
     console.error('❌ Reset failed:', error);
     process.exit(1);

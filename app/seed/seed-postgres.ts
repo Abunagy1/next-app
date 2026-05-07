@@ -942,8 +942,8 @@ for (const user of users) {
   `;
 
   // After all table creation, populate flight and hotel data
-  await seedFlightsPostgres();
-  await seedHotelsPostgres();
+  // await seedFlightsPostgres();
+  // await seedHotelsPostgres();
 
   console.log('✅ PostgreSQL seeding complete.');
 }
