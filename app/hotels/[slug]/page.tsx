@@ -283,7 +283,7 @@ export default async function HotelDetailsPage({ params }: { params: Promise<{ s
       <div>
         <h2 className="mb-[16px] text-2xl font-bold">Overview</h2>
         <p className="mb-[32px] font-medium opacity-75">{hotelDetails.description}</p>
-        <div className="golobe-scrollbar flex gap-[16px] overflow-x-auto pb-3">
+        <div className="gobye-scrollbar flex gap-[16px] overflow-x-auto pb-3">
           <div className="h-[145px] min-w-[160px] whitespace-nowrap rounded-[12px] bg-primary p-[16px]">
             <p className="mb-[32px] text-[2rem] font-bold">
               {totalReviewsCount ? rating.toFixed(1) : "N/A"}

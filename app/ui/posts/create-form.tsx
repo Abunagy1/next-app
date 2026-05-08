@@ -38,7 +38,8 @@ export default function CreatePostForm() {
           <UploadButton<OurFileRouter, 'postImageUploader'>
             endpoint="postImageUploader"
             onClientUploadComplete={(res) => {
-              const urls = res?.map((file) => file.url) || []; // ✅ use file.url
+              //const urls = res?.map((file) => file.url) || []; // ✅ use file.url
+              const urls = res?.map((file) => file.ufsUrl) || [];
               setImageUrls((prev) => [...prev, ...urls]);
             }}
             onUploadError={(error: Error) => {

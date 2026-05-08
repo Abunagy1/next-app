@@ -160,7 +160,7 @@ async function handleFlightBookingPaymentPostgres(charge: Stripe.Charge, methodT
       bookingDetails: emailBookingDetails,
     },
   });
-  await sendEmail([{ Email: metadata.userEmail }], "Thank you for booking flight with golobe", htmlEmail);
+  await sendEmail([{ Email: metadata.userEmail }], "Thank you for booking flight with gobye", htmlEmail);
   revalidateTag('userFlightBooking', {});
 }
 
@@ -224,7 +224,7 @@ async function handleFlightBookingPaymentMongo(charge: Stripe.Charge, methodType
           bookingDetails: emailBookingDetails,
         },
       });
-      await sendEmail([{ Email: charge.metadata!.userEmail }], "Thank you for booking flight with golobe", htmlEmail);
+      await sendEmail([{ Email: charge.metadata!.userEmail }], "Thank you for booking flight with gobye", htmlEmail);
       revalidateTag("userFlightBooking", {});
       return;   // success – exit retry loop
     } catch (error: any) {

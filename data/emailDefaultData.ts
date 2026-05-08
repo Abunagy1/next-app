@@ -32,7 +32,7 @@ const emailDefaultData = {
         text: "Terms & Conditions",
       },
     ],
-    companyAddress: "Golobe, 1, rue de la République, 75001 Paris, France",
+    companyAddress: "GoBye, 1, rue de la République, 75001 Paris, France",
   },
 };
 

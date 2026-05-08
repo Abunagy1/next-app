@@ -25,7 +25,7 @@ export async function getWebsiteReviews(limit = 10) {
     `;
     return rows.map((row: any) => ({
       id: row.id,
-      reviewer: row.first_name || 'Golobe User',
+      reviewer: row.first_name || 'GoBye User',
       image: row.image || '',
       rate: row.rating,
       comment: row.comment,
@@ -38,7 +38,7 @@ export async function getWebsiteReviews(limit = 10) {
         const user = await dataModels.User.findById(doc.userId).lean();
         return {
           id: doc._id.toString(),
-          reviewer: user?.firstName || 'Golobe User',
+          reviewer: user?.firstName || 'GoBye User',
           image: user?.image || '',
           rate: doc.rating,
           comment: doc.comment,

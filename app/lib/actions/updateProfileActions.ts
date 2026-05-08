@@ -336,10 +336,12 @@ export async function updatePasswordAction(prevState: any, formData: FormData) {
       isValid = await bcrypt.compare(currentPassword, rows[0].password);
     }
   } else {
+    // ---------- MongoDB fix ----------
     await connectDB();
-    const account = await dataModels.Account.findOne({ userId: session.user.id, provider: 'credentials' }).lean();
-    if (account && account.password) {
-      isValid = await bcrypt.compare(currentPassword, account.password);
+    // Fetch the user, not an Account document
+    const user = await dataModels.User.findById(session.user.id).lean();
+    if (user && user.password) {
+      isValid = await bcrypt.compare(currentPassword, user.password);
     }
   }
   if (!isValid) return { success: false, error: { currentPassword: 'Incorrect password' } };
@@ -347,7 +349,8 @@ export async function updatePasswordAction(prevState: any, formData: FormData) {
   if (dbType === 'postgres') {
     await sql`UPDATE users SET password = ${hashedPassword}, updated_at = NOW() WHERE id = ${session.user.id}`;
   } else {
-    await updateOneDoc('Account', { userId: session.user.id, provider: 'credentials' }, { password: hashedPassword });
+    // Update the User document, NOT the Account document
+    await updateOneDoc('User', { _id: strToObjectId(session.user.id) }, { password: hashedPassword });
   }
   revalidateTag('userAccount', {});
   return { success: true, message: 'Password changed successfully' };

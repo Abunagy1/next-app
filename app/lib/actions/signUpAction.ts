@@ -1,5 +1,4 @@
 'use server';
-
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { dbType, sql, connectDB } from '@/app/lib/db/index';
@@ -13,15 +12,18 @@ import { randomUUID } from 'crypto';
 import { generateAvatar } from '@/app/lib/utils.server';
 import { createUniqueCustomer } from '@/app/lib/paymentIntegration/stripe';
 import emailDefaultData from '@/data/emailDefaultData';
-import { newUserSignupEmailTemplate } from '@/app/lib/email/templates';
 import sendEmail from '@/app/lib/email/sendEmail';
+import { redirect } from 'next/navigation';
+import { emailConfirmationEmailTemplate, newUserSignupEmailTemplate } from '@/app/lib/email/templates';
+
+
 
 // Define a transaction type for PostgreSQL
-type PgTransaction = {
-  (strings: TemplateStringsArray, ...exprs: any[]): Promise<any>;
-  commit: () => Promise<void>;
-  rollback: () => Promise<void>;
-};
+// type PgTransaction = {
+//   (strings: TemplateStringsArray, ...exprs: any[]): Promise<any>;
+//   commit: () => Promise<void>;
+//   rollback: () => Promise<void>;
+// };
 
 const phoneSchema = z.object({
   number: z.string().regex(/^\d+$/),
@@ -60,16 +62,17 @@ export async function signUpAction(prevState: any, formData: FormData) {
   const parsed = signupSchema.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string> = {};
-    parsed.error.issues.forEach(issue => {
+    parsed.error.issues.forEach((issue: any) => {
       const path = issue.path[0];
       const key = typeof path === 'string' ? path : String(path);
       errors[key] = issue.message;
     });
     return { success: false, error: errors };
   }
+
   const { email, password, firstname, lastname, phone } = parsed.data;
 
-  // Check if user already exists
+  // Check if user exists
   if (dbType === 'postgres') {
     const rows = await sql`SELECT id FROM users WHERE email = ${email}`;
     if (rows.length > 0) {
@@ -86,6 +89,7 @@ export async function signUpAction(prevState: any, formData: FormData) {
   const hashedPassword = await bcrypt.hash(password, 10);
   const avatar = await generateAvatar(firstname);
 
+  // Strip customer
   let customerId: string | null = null;
   try {
     const customer = await createUniqueCustomer(
@@ -102,67 +106,97 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
   const coverImage = 'https://images.unsplash.com/photo-1614850715649-1d0106293bd1?q=80&w=1170&auto=format&fit=crop';
 
-  // Define common user object (used by both PostgreSQL and MongoDB)
   const userObj = {
     firstName: firstname,
     lastName: lastname,
     email,
     emailVerifiedAt: null,
     emails: [{ email, primary: true }],
-    image: avatar, // unified Profile Image name instead of profileImage
+    image: avatar,
     coverImage,
     phoneNumbers: phone ? [{ number: phone.number, dialCode: phone.dialCode, primary: true }] : [],
     address: null,
-    birth_date: null,               // unified field
+    birth_date: null,
     flights: {},
     hotels: {},
     rewardPoints: { totalPoints: 0, pointHistory: [] },
     customerId,
   };
 
+  // ---------- PostgreSQL ----------
   if (dbType === 'postgres') {
-    const trx = await sql.begin() as PgTransaction;
     try {
       const userId = randomUUID();
       const accountId = randomUUID();
 
-      await trx`
+      await sql`
         INSERT INTO users (
-          id, first_name, last_name, email, emails, image, cover_image,
-          phone_numbers, address, birth_date, customer_id, flights, hotels,
-          reward_points, created_at, updated_at
+          id, name, first_name, last_name, email, password, email_verified,
+          emails, image, cover_image, phone_numbers, address, birth_date,
+          customer_id, role, flights, hotels, reward_points, created_at, updated_at
         ) VALUES (
-          ${userId}, ${userObj.firstName}, ${userObj.lastName}, ${userObj.email},
+          ${userId}, ${`${firstname} ${lastname}`}, ${firstname}, ${lastname},
+          ${email}, ${hashedPassword}, FALSE,
           ${JSON.stringify(userObj.emails)}::jsonb,
-          ${userObj.image}, ${userObj.coverImage},
+          ${userObj.image},
+          ${userObj.coverImage},
           ${JSON.stringify(userObj.phoneNumbers)}::jsonb,
-          ${userObj.address}, ${userObj.birth_date}, ${userObj.customerId},
-          ${JSON.stringify(userObj.flights)}::jsonb, ${JSON.stringify(userObj.hotels)}::jsonb,
+          ${userObj.address},
+          ${userObj.birth_date},
+          ${customerId},
+          'user',
+          ${JSON.stringify({})}::jsonb,
+          ${JSON.stringify({})}::jsonb,
           ${JSON.stringify(userObj.rewardPoints)}::jsonb,
           NOW(), NOW()
         )
       `;
 
-      await trx`
+      await sql`
         INSERT INTO accounts (
           id, user_id, provider, provider_account_id, type, password, created_at, updated_at
         ) VALUES (
-          ${accountId}, ${userId}, 'credentials', ${userId}, 'credentials', ${hashedPassword},
-          NOW(), NOW()
+          ${accountId}, ${userId}, 'credentials', ${userId}, 'credentials',
+          ${hashedPassword}, NOW(), NOW()
         )
       `;
-      await trx.commit();
+
+      const token = randomUUID();
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await sql`
+        INSERT INTO verification_tokens (identifier, token, expires)
+        VALUES (${userId}, ${token}, ${expires})
+      `;
+
+      // Send verification email
+      try {
+        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/confirm_email?token=${token}`;
+        const htmlEmail = emailConfirmationEmailTemplate({
+          ...emailDefaultData,
+          main: { verificationUrl, expirationTime: '24 hours' },
+        });
+        await sendEmail([{ Email: email }], 'Email Confirmation', htmlEmail);
+      } catch (err: any) {
+        console.error('❌ Verification email failed:', err.message || err);
+      }
+
       await incOrDecrementAnalytics({ totalUsersSignedUp: 1 });
     } catch (error) {
-      await trx.rollback();
+      if (error instanceof Error && error.message?.includes('NEXT_REDIRECT')) {
+        throw error;  // allow redirects to propagate
+      }
       console.error('PostgreSQL signup error:', error);
       return { success: false, message: 'Something went wrong, try again' };
     }
-  } else {
+  }
+  // ---------- MongoDB ----------
+  else {
     const mongoSession = await mongoose.startSession();
     mongoSession.startTransaction();
     try {
       await createAnalytics();
+
       const user = await createOneDoc('User', userObj, { session: mongoSession });
       const accountObj = {
         userId: user._id,
@@ -172,9 +206,33 @@ export async function signUpAction(prevState: any, formData: FormData) {
         password: hashedPassword,
       };
       await createOneDoc('Account', accountObj, { session: mongoSession });
+
+      const token = randomUUID();
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await createOneDoc('Verification_Token', {
+        identifier: user._id.toString(),
+        token,
+        expires,
+      }, { session: mongoSession });
+
+      // Send verification email
+      try {
+        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/confirm_email?token=${token}`;
+        const htmlEmail = emailConfirmationEmailTemplate({
+          ...emailDefaultData,
+          main: { verificationUrl, expirationTime: '24 hours' },
+        });
+        await sendEmail([{ Email: email }], 'Email Confirmation', htmlEmail);
+      } catch (err: any) {
+        console.error('❌ Verification email failed:', err.message || err);
+      }
+
       await mongoSession.commitTransaction();
       await incOrDecrementAnalytics({ totalUsersSignedUp: 1 });
     } catch (error) {
+      if (error instanceof Error && error.message?.includes('NEXT_REDIRECT')) {
+        throw error;
+      }
       if (mongoSession.inTransaction()) await mongoSession.abortTransaction();
       console.error('MongoDB signup error:', error);
       return { success: false, message: 'Something went wrong, try again' };
@@ -183,16 +241,8 @@ export async function signUpAction(prevState: any, formData: FormData) {
     }
   }
 
-  // Send welcome email
-  try {
-    const htmlEmail = newUserSignupEmailTemplate({
-      ...emailDefaultData,
-      main: { firstName: firstname },
-    });
-    await sendEmail([{ Email: email }], 'Welcome to Golobe', htmlEmail);
-  } catch (e) {
-    console.warn('Welcome email failed:', e);
-  }
-
-  return { success: true, message: 'User created successfully' };
+  // ✅ Redirect happens outside of any try/catch that would suppress it
+  redirect('/user/login?registered=1');
 }
+
+

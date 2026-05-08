@@ -36,41 +36,43 @@ export async function createAnalytics(): Promise<void> {
  * @param data - Object with keys to increment (e.g., { totalUsersSignedUp: 1, totalAccountsDeleted: 1 })
  */
 export async function incOrDecrementAnalytics(data: {
-  totalUsersSignedUp?: number;
-  totalAccountsDeleted?: number;
+    totalUsersSignedUp?: number;
+    totalAccountsDeleted?: number;
 }): Promise<void> {
-  if (dbType === 'postgres') {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let idx = 1;
-    if (data.totalUsersSignedUp !== undefined) {
-      updates.push(`total_users_signed_up = total_users_signed_up + $${idx++}`);
-      values.push(data.totalUsersSignedUp);
+    if (dbType === 'postgres') {
+        const updates: string[] = [];
+        const values: any[] = [];
+        let idx = 1;
+        if (data.totalUsersSignedUp !== undefined) {
+            updates.push(`total_users_signed_up = total_users_signed_up + $${idx++}`);
+            values.push(data.totalUsersSignedUp);
+        }
+        if (data.totalAccountsDeleted !== undefined) {
+            updates.push(`total_accounts_deleted = total_accounts_deleted + $${idx++}`);
+            values.push(data.totalAccountsDeleted);
+        }
+        if (updates.length === 0) return;
+        updates.push(`updated_at = NOW()`);
+
+        // Use sql.unsafe with separate values so they are bound as parameters
+        await sql.unsafe(
+            `UPDATE analytics SET ${updates.join(', ')} WHERE id = 1`,
+            values
+        );
+    } else {
+        // MongoDB logic unchanged
+        await connectDB();
+        const updateFields: Record<string, number> = {};
+        if (data.totalUsersSignedUp !== undefined) {
+            updateFields.totalUsersSignedUp = data.totalUsersSignedUp;
+        }
+        if (data.totalAccountsDeleted !== undefined) {
+            updateFields.totalAccountsDeleted = data.totalAccountsDeleted;
+        }
+        if (Object.keys(updateFields).length === 0) return;
+        await dataModels.Analytic.updateOne(
+            { _id: 'analytics' },
+            { $inc: updateFields, $set: { updatedAt: new Date() } }
+        );
     }
-    if (data.totalAccountsDeleted !== undefined) {
-      updates.push(`total_accounts_deleted = total_accounts_deleted + $${idx++}`);
-      values.push(data.totalAccountsDeleted);
-    }
-    if (updates.length === 0) return;
-    updates.push(`updated_at = NOW()`);
-    await sql`
-      UPDATE analytics
-      SET ${sql.unsafe(updates.join(', '))}
-      WHERE id = 1
-    `;
-  } else {
-    await connectDB();
-    const updateFields: Record<string, number> = {};
-    if (data.totalUsersSignedUp !== undefined) {
-      updateFields.totalUsersSignedUp = data.totalUsersSignedUp;
-    }
-    if (data.totalAccountsDeleted !== undefined) {
-      updateFields.totalAccountsDeleted = data.totalAccountsDeleted;
-    }
-    if (Object.keys(updateFields).length === 0) return;
-    await dataModels.Analytic.updateOne(
-      { _id: 'analytics' },
-      { $inc: updateFields, $set: { updatedAt: new Date() } }
-    );
-  }
 }

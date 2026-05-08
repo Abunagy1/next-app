@@ -20,6 +20,8 @@ import bcrypt from 'bcryptjs';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import type { Post, User, Product } from './definitions';   // Add this line
+import sendEmail from '@/app/lib/email/sendEmail';
+
 //import { type } from 'os';
 // ---------- Invoice Schemas ----------
 const FormSchema = z.object({
@@ -1293,10 +1295,16 @@ export async function createStoreInvoice(formData: FormData) {
     });
     invoiceId = newInvoice._id.toString();
   }
+
+  const htmlEmail = `<h1>Thank you for your purchase!</h1>
+  <p>Product: ${product.name} x ${quantity}</p>
+  <p>Total: $${(totalAmount/100).toFixed(2)}</p>
+  <p>Invoice ID: ${invoiceId}</p>`;
+  await sendEmail([{ Email: email }], 'Purchase Confirmation', htmlEmail);
   // Send confirmation email (fire and forget)
-  import('./email').then(({ sendPurchaseConfirmation }) => {
-    sendPurchaseConfirmation(email, { product, quantity, total: totalAmount / 100, invoiceId }).catch(console.error);
-  });
+  // import('./email').then(({ sendPurchaseConfirmation }) => {
+  //   sendPurchaseConfirmation(email, { product, quantity, total: totalAmount / 100, invoiceId }).catch(console.error);
+  // });
   if (paymentMethod === 'bank_transfer') {
     return { invoiceId, message: 'Order placed. Please complete bank transfer.' };
   } else {
@@ -1311,29 +1319,69 @@ const ContactSchema = z.object({
   message: z.string().min(2, 'Message must be at least 2 characters'),
 });
 
+// export async function sendContactMessage(prevState: string | undefined, formData: FormData) {
+//   //console.log('🔵 sendContactMessage started');
+//   //console.log('FormData entries:', Array.from(formData.entries()));
+//   const validatedFields = ContactSchema.safeParse({
+//     name: formData.get('name'),
+//     email: formData.get('email'),
+//     message: formData.get('message'),
+//   });
+//   console.log('Validation result:', validatedFields);
+//   if (!validatedFields.success) {
+//     console.log('❌ Validation failed:', validatedFields.error.flatten());
+//     return validatedFields.error.flatten().formErrors.join(', ');
+//   }
+//   const { name, email, message } = validatedFields.data;
+//   console.log('✅ Validation passed:', { name, email, messageLength: message.length });
+//   try {
+//     console.log('📧 Calling sendContactEmails...');
+//     await sendContactEmails(name, email, message);
+//     // Email to admin
+//     console.log('✅ Emails sent successfully');
+//   } catch (error) {
+//     console.error('❌ Error sending contact emails:', error);
+//     return 'Failed to send message. Please try again later.';
+//   }
+//   console.log('🔄 Redirecting to thank-you page');
+//   redirect('/contact/thank-you');
+// }
 export async function sendContactMessage(prevState: string | undefined, formData: FormData) {
-  //console.log('🔵 sendContactMessage started');
-  //console.log('FormData entries:', Array.from(formData.entries()));
   const validatedFields = ContactSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     message: formData.get('message'),
   });
-  console.log('Validation result:', validatedFields);
   if (!validatedFields.success) {
-    console.log('❌ Validation failed:', validatedFields.error.flatten());
     return validatedFields.error.flatten().formErrors.join(', ');
   }
+
   const { name, email, message } = validatedFields.data;
-  console.log('✅ Validation passed:', { name, email, messageLength: message.length });
+
   try {
-    console.log('📧 Calling sendContactEmails...');
-    await sendContactEmails(name, email, message);
-    console.log('✅ Emails sent successfully');
+    // Email to admin (you)
+    await sendEmail(
+      [{ Email: process.env.MAIL_SENDER_EMAIL! }],
+      `New contact message from ${name}`,
+      `<p><strong>Name:</strong> ${name}</p>
+       <p><strong>Email:</strong> ${email}</p>
+       <p><strong>Message:</strong><br/>${message.replace(/\n/g, '<br/>')}</p>`
+    );
+
+    // Confirmation email to user
+    await sendEmail(
+      [{ Email: email }],
+      'Thank you for contacting us',
+      `<p>Dear ${name},</p>
+       <p>We have received your message and will get back to you as soon as possible.</p>
+       <p>Here is a copy of your message:</p>
+       <blockquote>${message.replace(/\n/g, '<br/>')}</blockquote>
+       <p>Best regards,<br/>GoBye Team</p>`
+    );
   } catch (error) {
-    console.error('❌ Error sending contact emails:', error);
+    console.error('Failed to send contact emails:', error);
     return 'Failed to send message. Please try again later.';
   }
-  console.log('🔄 Redirecting to thank-you page');
+
   redirect('/contact/thank-you');
 }

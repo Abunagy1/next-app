@@ -6,6 +6,7 @@
     "database": { "ENV": "DEV_DB_NAME" },
     "username": { "ENV": "DEV_DB_USER" },
     "password": { "ENV": "DEV_DB_PASSWORD" },
+    "ssl": true,
     "multipleStatements": true
   },
   "test": {
@@ -15,12 +16,13 @@
     "database": { "ENV": "TEST_DB_NAME" },
     "username": { "ENV": "TEST_DB_USER" },
     "password": { "ENV": "TEST_DB_PASSWORD" },
+    "ssl": true,
     "multipleStatements": true
   },
   "prod": {
     "driver": "pg",
     "url": { "ENV": "POSTGRES_URL" },
-    "multipleStatements": true,
-    "ssl": true
+    "ssl": true,
+    "multipleStatements": true  
   }
 }

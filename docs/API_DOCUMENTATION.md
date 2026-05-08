@@ -1,6 +1,6 @@
-# API Documentation - Golobe Travel Agency
+# API Documentation - GoBye Travel Agency
 
-This document provides information about the available API endpoints in the Golobe Travel Agency application.
+This document provides information about the available API endpoints in the GoBye Travel Agency application.
 
 ## 🔐 Authentication
 
