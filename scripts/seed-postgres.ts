@@ -1,6 +1,7 @@
 // scripts/seed-postgres.ts
-import dotenv from 'dotenv';
-dotenv.config();
+// import dotenv from 'dotenv';
+// dotenv.config();
+import 'dotenv/config';
 import { seedPostgres } from '@/app/seed/seed-postgres';
 import { sql } from '@/app/lib/db/db-core';
 async function run() {
