@@ -1,8 +1,12 @@
 const emailDefaultData = {
+  // branding: {
+  //   logoImageUrl: 'https://via.placeholder.com/200x50?text=GoBye',
+  //   baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+  // },
   branding: {
-    logoImageUrl: 'https://via.placeholder.com/200x50?text=GoBye',
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
-  },
+  logoImageUrl: 'https://placehold.co/200x50/1F2937/FFFFFF?text=GoBye',
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+},
   socialIcons: {
     facebookIconUrl:
       "https://s68ty.mjt.lu/img2/s68ty/3e251711-c52b-4997-9e56-6dd9d3419304/content",

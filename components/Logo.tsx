@@ -65,19 +65,5 @@ export function Logo({ worldFill, otherFill, className }: LogoProps) {
         </defs>
       </svg> */}
     </Link>
-  );
-  
+  );  
 }
-      // <Link aria-label="GoBye. Click to go to home page" href="/">
-      //   <span className={cn('flex items-center gap-2', className)}>
-      //     {/* Optional simple icon */}
-      //     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      //       <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" />
-      //       <path d="M10 16l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      //     </svg>
-      //     {/* Text logo */}
-      //     <span className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-      //       GoBye
-      //     </span>
-      //   </span>
-      // </Link>
