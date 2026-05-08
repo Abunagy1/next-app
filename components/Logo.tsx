@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { cn } from '@/app/lib/utils';
 import Image from 'next/image';
@@ -19,7 +18,7 @@ export function Logo({ worldFill, otherFill, className }: LogoProps) {
       )}>
         GoBye
       </span>
-      <svg
+      {/* <svg
         width="120"
         height="40"
         viewBox="0 0 938 306"
@@ -64,7 +63,21 @@ export function Logo({ worldFill, otherFill, className }: LogoProps) {
             <rect width="938" height="306" fill="white" />
           </clipPath>
         </defs>
-      </svg>
+      </svg> */}
     </Link>
   );
+  
 }
+      // <Link aria-label="GoBye. Click to go to home page" href="/">
+      //   <span className={cn('flex items-center gap-2', className)}>
+      //     {/* Optional simple icon */}
+      //     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      //       <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" />
+      //       <path d="M10 16l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      //     </svg>
+      //     {/* Text logo */}
+      //     <span className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      //       GoBye
+      //     </span>
+      //   </span>
+      // </Link>

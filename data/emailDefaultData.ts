@@ -1,7 +1,6 @@
 const emailDefaultData = {
   branding: {
-    logoImageUrl:
-      "https://s68ty.mjt.lu/img2/s68ty/fe3067a2-0454-440f-b497-bb6d88ee65c8/content",
+    logoImageUrl: 'https://via.placeholder.com/200x50?text=GoBye',
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
   },
   socialIcons: {
