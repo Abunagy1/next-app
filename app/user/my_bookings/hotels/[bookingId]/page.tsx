@@ -125,7 +125,8 @@ export default async function HotelBookingDetailsPage({
             booking.paymentStatus,
             hotel.policies?.cancellationPolicy,
             hotel.policies?.refundPolicy,
-            checkIn
+            checkIn,
+            booking.paymentMethod  // ← add this
         );
 
     return (

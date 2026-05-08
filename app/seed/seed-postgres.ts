@@ -1234,9 +1234,205 @@ async function seedFlightsPostgres() {
       'layovers', 'baggage_allowance', 'status', 'expire_at'
     ], itineraryRows);
   }
+  console.log(` Inserted ${airports.length} airports, ${airlines.length} airlines, ${airplanes.length} airplanes, ${airlineFlightPrices.length} prices, ${flightSegments.length} segments, ${flightSeats.length} seats, ${flightItineraries.length} itineraries.`);
+}
+// if the above function is slow take this much more better ,i idn't try it still
+/*
+async function seedFlightsPostgres() {
+  console.log(' Generating flights data for PostgreSQL...');
+
+  const airports = await generateAirportsDB(primaryAirportData);
+  const { airplaneData: airplanes, seatData: seats } = await generateAirplanesDB(primaryAirplaneData);
+  const airlines = await generateAirlinesDB(primaryAirlineData);
+  const airlineFlightPrices = await generateAirlineFlightPricesDB(primaryAirlineData);
+
+  const flightsData = await generateFlightsDB(10, airports, airplanes, airlines, airlineFlightPrices);
+
+  const flightItineraries: any[] = [];
+  const flightSegments: any[] = [];
+  const flightSeats: any[] = [];
+  for (const day of flightsData) {
+    flightItineraries.push(...day.flightItinerary);
+    flightSegments.push(...day.flightSegments);
+    flightSeats.push(...day.flightSeats);
+  }
+
+  // ---------- Ultra‑fast batch insert helper ----------
+  const BATCH_SIZE = 5000;   // bigger batches = fewer round‑trips
+
+  const escapeString = (s: any) => {
+    if (s === null || s === undefined) return 'NULL';
+    return `'${String(s).replace(/'/g, "''")}'`;
+  };
+
+  const escapeJson = (obj: any) => escapeString(JSON.stringify(obj));
+
+  const insertBatchUltra = async (table: string, columns: string[], rows: any[]) => {
+    if (rows.length === 0) return;
+    const colNames = columns.join(', ');
+
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch = rows.slice(i, i + BATCH_SIZE);
+      const values = batch.map(row => {
+        const vals = columns.map(col => {
+          const v = row[col];
+          if (v === null || v === undefined) return 'NULL';
+          // If it's an array or object, serialize to JSON and escape
+          if (typeof v === 'object') return escapeString(JSON.stringify(v));
+          return escapeString(v);
+        });
+        return `(${vals.join(', ')})`;
+      }).join(',\n');
+
+      const sqlStatement = `INSERT INTO ${table} (${colNames}) VALUES ${values}`;
+      await sql.unsafe(sqlStatement);
+    }
+  };
+
+  // 1. Airports
+  if (airports.length) {
+    await insertBatchUltra('airports', [
+      'iata_code', 'name', 'city', 'state', 'country', 'latitude', 'longitude', 'timezone', 'facilities', 'image'
+    ], airports.map(a => ({
+      iata_code: a.iataCode,
+      name: a.name,
+      city: a.city,
+      state: a.state || null,
+      country: a.country,
+      latitude: a.latitude,
+      longitude: a.longitude,
+      timezone: a.timezone,
+      facilities: a.facilities || [],
+      image: a.image || null
+    })));
+  }
+
+  // 2. Airlines
+  if (airlines.length) {
+    await insertBatchUltra('airlines', ['iata_code', 'name', 'logo', 'contact', 'airline_policy'], airlines.map(a => ({
+      iata_code: a.iataCode,
+      name: a.name,
+      logo: a.logo || null,
+      contact: JSON.stringify(a.contact || {}),
+      airline_policy: JSON.stringify(a.airlinePolicy || {})
+    })));
+  }
+
+  // 3. Airplanes (map IDs)
+  const airplaneIdMap = new Map<string, string>();
+  if (airplanes.length) {
+    const airplaneRows = airplanes.map(a => {
+      const newId = randomUUID();
+      airplaneIdMap.set(a._id, newId);
+      return {
+        id: newId,
+        airline_id: a.airlineId,
+        model: a.model,
+        cruise_speed: JSON.stringify(a.cruiseSpeed || {}),
+        classes: a.classes,
+        total_seats: a.totalSeats,
+        seats: JSON.stringify(a.seats || []),
+        images: a.images || []
+      };
+    });
+    await insertBatchUltra('airplanes', ['id', 'airline_id', 'model', 'cruise_speed', 'classes', 'total_seats', 'seats', 'images'], airplaneRows);
+  }
+
+  // 4. Airline flight prices
+  if (airlineFlightPrices.length) {
+    await insertBatchUltra('airline_flight_prices', [
+      'airline_code', 'departure_airport_code', 'arrival_airport_code', 'distance', 'base_price', 'discount', 'service_fee', 'taxes'
+    ], airlineFlightPrices.map(p => ({
+      airline_code: p.airlineCode,
+      departure_airport_code: p.departureAirportCode,
+      arrival_airport_code: p.arrivalAirportCode,
+      distance: JSON.stringify(p.distance || {}),
+      base_price: JSON.stringify(p.basePrice || {}),
+      discount: JSON.stringify(p.discount || {}),
+      service_fee: JSON.stringify(p.serviceFee || {}),
+      taxes: JSON.stringify(p.taxes || {})
+    })));
+  }
+
+  // 5. Flight segments (map IDs)
+  const segmentIdMap = new Map<string, string>();
+  if (flightSegments.length) {
+    const segmentRows = flightSegments.map(s => {
+      const newId = randomUUID();
+      segmentIdMap.set(s._id, newId);
+      return {
+        id: newId,
+        flight_number: s.flightNumber,
+        date: s.date.toISOString(),
+        airline_id: s.airlineId,
+        airplane_id: airplaneIdMap.get(s.airplaneId) || null,
+        from_airport: s.from.airport,
+        scheduled_departure: s.from.scheduledDeparture.toISOString(),
+        from_terminal: s.from.terminal || null,
+        from_gate: s.from.gate || null,
+        to_airport: s.to.airport,
+        scheduled_arrival: s.to.scheduledArrival.toISOString(),
+        to_terminal: s.to.terminal || null,
+        to_gate: s.to.gate || null,
+        duration_minutes: Math.floor(s.durationMinutes),
+        fare_details: JSON.stringify(s.fareDetails || {}),
+        baggage_allowance: JSON.stringify(s.baggageAllowance || {}),
+        seats: '{}',
+        status: s.status,
+        expire_at: s.expireAt.toISOString()
+      };
+    });
+    await insertBatchUltra('flight_segments', [
+      'id', 'flight_number', 'date', 'airline_id', 'airplane_id', 'from_airport',
+      'scheduled_departure', 'from_terminal', 'from_gate', 'to_airport',
+      'scheduled_arrival', 'to_terminal', 'to_gate', 'duration_minutes',
+      'fare_details', 'baggage_allowance', 'seats', 'status', 'expire_at'
+    ], segmentRows);
+  }
+
+  // 6. Flight seats
+  if (flightSeats.length) {
+    const seatRows = flightSeats.map(s => ({
+      id: randomUUID(),
+      seat_number: s.seatNumber,
+      airplane_id: airplaneIdMap.get(s.airplaneId) || null,
+      segment_id: segmentIdMap.get(s.segmentId) || null,
+      class: s.class,
+      reservation: JSON.stringify(s.reservation || {}),
+      expire_at: s.expireAt.toISOString()
+    }));
+    await insertBatchUltra('flight_seats', ['id', 'seat_number', 'airplane_id', 'segment_id', 'class', 'reservation', 'expire_at'], seatRows);
+  }
+
+  // 7. Flight itineraries (map segment IDs)
+  if (flightItineraries.length) {
+    const itineraryRows = flightItineraries.map(it => ({
+      id: randomUUID(),
+      flight_code: it.flightCode,
+      date: it.date.toISOString(),
+      carrier_in_charge: it.carrierInCharge,
+      departure_airport_id: it.departureAirportId,
+      arrival_airport_id: it.arrivalAirportId,
+      segment_ids: it.segmentIds.map((sid: any) => segmentIdMap.get(sid)).filter(Boolean),
+      total_duration_minutes: Math.floor(it.totalDurationMinutes),
+      layovers: JSON.stringify(it.layovers || []),
+      baggage_allowance: JSON.stringify(it.baggageAllowance || {}),
+      status: it.status,
+      expire_at: it.expireAt.toISOString()
+    }));
+    await insertBatchUltra('flight_itineraries', [
+      'id', 'flight_code', 'date', 'carrier_in_charge', 'departure_airport_id',
+      'arrival_airport_id', 'segment_ids', 'total_duration_minutes',
+      'layovers', 'baggage_allowance', 'status', 'expire_at'
+    ], itineraryRows);
+  }
 
   console.log(` Inserted ${airports.length} airports, ${airlines.length} airlines, ${airplanes.length} airplanes, ${airlineFlightPrices.length} prices, ${flightSegments.length} segments, ${flightSeats.length} seats, ${flightItineraries.length} itineraries.`);
 }
+
+*/
+
+
 // async function seedHotelsPostgres() {
 //   // Clear hotel data before inserting (respect foreign keys) -- No Need for it as the Glopal command at the top will do this
 //   //await sql`TRUNCATE TABLE hotel_rooms, hotels CASCADE`;
@@ -1336,77 +1532,75 @@ async function seedHotelsPostgres() {
 
   const { hotel: hotels, hotelRoom: rooms } = await generateHotelsDB();
 
-  // 1. Hotels
-  const hotelIdMap = new Map<string, string>();
-  if (hotels.length) {
-    const hotelRows = hotels.map(hotel => {
-      const newId = randomUUID();
-      hotelIdMap.set(hotel._id, newId);
+  // 1. Insert hotels one by one (safe JSONB handling)
+  const hotelIdMap = new Map<string, string>(); // old _id → new UUID
+  for (const hotel of hotels) {
+    const newId = randomUUID();
+    hotelIdMap.set(hotel._id, newId);
 
-      const address = typeof hotel.address === 'string'
-        ? JSON.parse(hotel.address)
-        : hotel.address || {};
+    const address = typeof hotel.address === 'string'
+      ? JSON.parse(hotel.address)
+      : hotel.address || {};
 
-      return {
-        id: newId,
-        slug: hotel.slug,
-        name: hotel.name,
-        description: hotel.description ?? null,
-        category: hotel.category ?? null,
-        parking_included: hotel.parkingIncluded ?? false,
-        last_renovation_date: hotel.lastRenovationDate ?? null,
-        is_deleted: hotel.isDeleted ?? false,
-        address: JSON.stringify(address),
-        coordinates: JSON.stringify(hotel.coordinates || {}),
-        amenities: hotel.amenities || [],
-        features: hotel.features || [],
-        images: hotel.images || [],
-        tags: hotel.tags || [],
-        policies: JSON.stringify(hotel.policies || {}),
-        total_rooms: hotel.rooms.length,
-        status: hotel.status || 'Opened',
-      };
-    });
-
-    await insertBatch('hotels', [
-      'id', 'slug', 'name', 'description', 'category', 'parking_included',
-      'last_renovation_date', 'is_deleted', 'address', 'coordinates',
-      'amenities', 'features', 'images', 'tags', 'policies', 'total_rooms', 'status'
-    ], hotelRows);
+    await sql`
+      INSERT INTO hotels (
+        id, slug, name, description, category, parking_included,
+        last_renovation_date, is_deleted, address, coordinates,
+        amenities, features, images, tags, policies, total_rooms, status
+      ) VALUES (
+        ${newId},
+        ${hotel.slug},
+        ${hotel.name},
+        ${hotel.description ?? null},
+        ${hotel.category ?? null},
+        ${hotel.parkingIncluded ?? false},
+        ${hotel.lastRenovationDate ?? null},
+        ${hotel.isDeleted ?? false},
+        ${address},                       -- JS object → JSONB automatically
+        ${hotel.coordinates ?? {}},
+        ${hotel.amenities ?? []},
+        ${hotel.features ?? []},
+        ${hotel.images ?? []},
+        ${hotel.tags ?? []},
+        ${hotel.policies ?? {}},
+        ${hotel.rooms.length},
+        ${hotel.status ?? 'Opened'}
+      )
+    `;
   }
 
-  // 2. Hotel rooms
-  if (rooms.length) {
-    const roomRows = rooms.map(room => {
-      const hotelId = hotelIdMap.get(room.hotelId);
-      return {
-        id: randomUUID(),
-        hotel_id: hotelId,
-        room_number: room.roomNumber ?? null,
-        description: room.description ?? null,
-        room_type: room.roomType ?? null,
-        bed_options: room.bedOptions ?? null,
-        sleeps_count: room.sleepsCount ?? 0,
-        floor: room.floor ?? null,
-        total_beds: room.totalBeds ?? 1,
-        smoking_allowed: room.smokingAllowed ?? false,
-        max_adults: room.maxAdults ?? 2,
-        max_children: room.maxChildren ?? 0,
-        extra_bed_allowed: room.extraBedAllowed ?? false,
-        tags: room.tags ?? [],
-        price: JSON.stringify(room.price ?? {}),
-        images: room.images ?? [],
-        amenities: room.amenities ?? [],
-        features: room.features ?? [] 
-      };
-    });
+  // 2. Insert rooms one by one
+  for (const room of rooms) {
+    const hotelId = hotelIdMap.get(room.hotelId);
+    if (!hotelId) continue;
 
-    await insertBatch('hotel_rooms', [
-      'id', 'hotel_id', 'room_number', 'description', 'room_type',
-      'bed_options', 'sleeps_count', 'floor', 'total_beds',
-      'smoking_allowed', 'max_adults', 'max_children', 'extra_bed_allowed',
-      'tags', 'price', 'images', 'amenities', 'features'
-    ], roomRows);
+    await sql`
+      INSERT INTO hotel_rooms (
+        id, hotel_id, room_number, description, room_type,
+        bed_options, sleeps_count, floor, total_beds,
+        smoking_allowed, max_adults, max_children, extra_bed_allowed,
+        tags, price, images, amenities, features
+      ) VALUES (
+        ${randomUUID()},
+        ${hotelId},
+        ${room.roomNumber ?? null},
+        ${room.description ?? null},
+        ${room.roomType ?? null},
+        ${room.bedOptions ?? null},
+        ${room.sleepsCount ?? 0},
+        ${room.floor ?? null},
+        ${room.totalBeds ?? 1},
+        ${room.smokingAllowed ?? false},
+        ${room.maxAdults ?? 2},
+        ${room.maxChildren ?? 0},
+        ${room.extraBedAllowed ?? false},
+        ${room.tags ?? []},
+        ${room.price ?? {}},           -- JS object → JSONB
+        ${room.images ?? []},
+        ${room.amenities ?? []},
+        ${room.features ?? []}
+      )
+    `;
   }
 
   console.log(` Inserted ${hotels.length} hotels, ${rooms.length} hotel rooms.`);

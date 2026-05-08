@@ -116,6 +116,7 @@ export default function HotelBookingDetailsCard({
       bookingData.cancellationPolicy,
       bookingData.refundPolicy,
       checkInDateObj,
+      bookingData.paymentMethod   // ← pass paymentMethod
     );
 
   const bookingStatusBgClass =

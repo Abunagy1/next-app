@@ -6,7 +6,8 @@ export function allowedHotelBookingActionBtns(
   paymentStatus: string,
   cancellationPolicy: any,
   refundPolicy: any,
-  checkInDate: Date
+  checkInDate: Date,
+  paymentMethod?: string   // ← new optional parameter
 ) {
   const safeCancellationPolicy = cancellationPolicy ?? { cancellable: false };
   const cancelled = bookingStatus === 'cancelled';
@@ -23,6 +24,7 @@ export function allowedHotelBookingActionBtns(
       !cancelled &&
       (pending && new Date(checkInDate) > new Date()) ||
       (confirmed &&
+        (paymentStatus === 'pending' && paymentMethod === 'cash' && new Date(checkInDate) > new Date()) ||   // ← allow cancel if not paid and not past check‑in
             isHotelCancellable(safeCancellationPolicy, checkInDate, bookingStatus)),
     canRefund: isHotelRefundable(refundPolicy, bookingStatus, paymentStatus),
     canDownload: confirmed && paid,
