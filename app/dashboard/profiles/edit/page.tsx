@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import ProfileForm from '@/app/ui/profiles/profile-form';
 import { ProfileUser } from '@/app/lib/definitions';
 import { sql, dbType, connectDB } from '@/app/lib/db/index';
-import UserModel from '@/app/lib/db/models/User';
+import dataModels from '@/app/lib/db/models';
 export const dynamic = 'force-dynamic';
 export default async function EditProfilePage() {
   const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export default async function EditProfilePage() {
     user = users[0] || null;
   } else {
     await connectDB();
-    const doc = await UserModel.findById(session.user.id).lean();
+    const doc = await dataModels.User.findById(session.user.id).lean();
     if (doc) {
       user = {
         id: doc._id.toString(),

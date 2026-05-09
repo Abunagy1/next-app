@@ -4,7 +4,7 @@ import RevenueModel from '@/app/lib/db/models/Revenue';
 import InvoiceModel from '@/app/lib/db/models/Invoice';
 import CustomerModel from '@/app/lib/db/models/Customer';
 import PostModel from '@/app/lib/db/models/Post';
-import UserModel from '@/app/lib/db/models/User';
+import dataModels from '@/app/lib/db/models';
 import ProductModel from '@/app/lib/db/models/Product';
 import CommentModel from '@/app/lib/db/models/Comment';
 // ... (existing imports) ...
@@ -66,7 +66,7 @@ export async function getUserById(userId: string): Promise<Pick<User, 'name' | '
     }
   } else {
     await connectDB();
-    const user = await UserModel.findById(userId).lean();
+    const user = await dataModels.User.findById(userId).lean();
     if (!user) return null;
     return {
       name: user.name,

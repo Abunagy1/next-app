@@ -6,7 +6,6 @@ import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcryptjs';
 import { sql, dbType, connectDB } from '@/app/lib/db/index';
-import UserModel from '@/app/lib/db/models/User';
 import dataModels from '@/app/lib/db/models';
 async function getUser(email: string): Promise<User | undefined> {
   if (dbType === 'postgres') {
@@ -20,7 +19,7 @@ async function getUser(email: string): Promise<User | undefined> {
   } else {
     await connectDB();
     try {
-      const user = await UserModel.findOne({ email }).lean();
+      const user = await dataModels.User.findOne({ email }).lean();
       if (!user) return undefined;
       return {
         id: user._id.toString(),
@@ -32,7 +31,9 @@ async function getUser(email: string): Promise<User | undefined> {
         phone: user.phone,
         city: user.city,
         about: user.about,
-        birth_date: user.birth_date ? user.birth_date.toISOString().split('T')[0] : undefined,
+        birth_date: user.birth_date
+          ? user.birth_date.toISOString().split('T')[0]
+          : undefined,
         role: user.role,
         created_at: user.created_at?.toISOString(),
         updated_at: user.updated_at?.toISOString(),

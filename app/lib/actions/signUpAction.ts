@@ -15,7 +15,7 @@ import emailDefaultData from '@/data/emailDefaultData';
 import sendEmail from '@/app/lib/email/sendEmail';
 import { redirect } from 'next/navigation';
 import { emailConfirmationEmailTemplate, newUserSignupEmailTemplate } from '@/app/lib/email/templates';
-
+import { sendVerificationEmail } from '@/app/lib/email';
 
 
 // Define a transaction type for PostgreSQL
@@ -107,6 +107,9 @@ export async function signUpAction(prevState: any, formData: FormData) {
   const coverImage = 'https://images.unsplash.com/photo-1614850715649-1d0106293bd1?q=80&w=1170&auto=format&fit=crop';
 
   const userObj = {
+    name: `${firstname} ${lastname}`,   // required
+    password: hashedPassword,           // required
+    email_verified: false,              // required by schema
     firstName: firstname,
     lastName: lastname,
     email,
@@ -171,14 +174,21 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
       // Send verification email
       try {
-        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/confirm_email?token=${token}`;
+        // Try Mailjet first
+        // const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/confirm_email?token=${token}`;
+        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/verify?token=${token}`;
         const htmlEmail = emailConfirmationEmailTemplate({
           ...emailDefaultData,
           main: { verificationUrl, expirationTime: '24 hours' },
         });
         await sendEmail([{ Email: email }], 'Email Confirmation', htmlEmail);
-      } catch (err: any) {
-        console.error('❌ Verification email failed:', err.message || err);
+      } catch (mailjetErr: any) {
+        console.warn('Mailjet failed, falling back to nodemailer');
+        try {
+          await sendVerificationEmail(email, token);
+        } catch (nodemailerErr: any) {
+          console.error('❌ Fallback email also failed:', nodemailerErr.message || nodemailerErr);
+        }
       }
 
       await incOrDecrementAnalytics({ totalUsersSignedUp: 1 });
@@ -217,14 +227,20 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
       // Send verification email
       try {
+        // Try Mailjet first
         const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/confirm_email?token=${token}`;
         const htmlEmail = emailConfirmationEmailTemplate({
           ...emailDefaultData,
           main: { verificationUrl, expirationTime: '24 hours' },
         });
         await sendEmail([{ Email: email }], 'Email Confirmation', htmlEmail);
-      } catch (err: any) {
-        console.error('❌ Verification email failed:', err.message || err);
+      } catch (mailjetErr: any) {
+        console.warn('Mailjet failed, falling back to nodemailer');
+        try {
+          await sendVerificationEmail(email, token);
+        } catch (nodemailerErr: any) {
+          console.error('❌ Fallback email also failed:', nodemailerErr.message || nodemailerErr);
+        }
       }
 
       await mongoSession.commitTransaction();

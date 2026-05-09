@@ -76,14 +76,15 @@ const userSchema = new Schema(
     //profileImage: { type: String, required: true },
     coverImage: { type: String, required: false },
     emailVerifiedAt: { type: Date, required: false, default: null },
+    flights: flightRelatedDataSchema,
+    hotels: hotelRelatedDataSchema,
     phoneNumbers: [phoneSchema],
     address: {
       type: String,
       default: null,
     },
     customerId: { type: String, default: null }, // stripe customer id
-    flights: flightRelatedDataSchema,
-    hotels: hotelRelatedDataSchema,
+  
     rewardPoints: rewardPoints,
     flightBookmarks: [{
       flightId: { type: Schema.Types.ObjectId, ref: 'FlightItinerary' },

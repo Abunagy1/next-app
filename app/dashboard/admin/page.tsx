@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import AdminUserTable from '../../ui/admin/user-table';
 import { User } from '@/app/lib/definitions';
 import { sql, mongoose, dbType, connectDB } from '@/app/lib/db/index';
-import UserModel from '@/app/lib/db/models/User';
+import dataModels from '@/app/lib/db/models';
 export const dynamic = 'force-dynamic';
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export default async function AdminPage() {
     `;
   } else {
     await connectDB();
-    const docs = await UserModel.find().sort({ created_at: -1 }).lean();
+    const docs = await dataModels.User.find().sort({ created_at: -1 }).lean();
     users = docs.map((doc) => ({
       id: doc._id.toString(),
       name: doc.name,

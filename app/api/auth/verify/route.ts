@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
 //const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import { sql, mongoose, dbType, connectDB } from '@/app/lib/db/index';
 import dataModels from '@/app/lib/db/models';
-import UserModel from '@/app/lib/db/models/User';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
@@ -45,8 +44,9 @@ export async function GET(request: Request) {
       if (new Date() > new Date(tokenDoc.expires)) {
         return new Response('Token expired', { status: 400 });
       }
-      await UserModel.updateOne({ _id: tokenDoc.user_id }, { email_verified: true });
-      await dataModels.Verification_Token.deleteOne({ token });
+      await dataModels.User.updateOne({ _id: tokenDoc.identifier }, { email_verified: true });
+      // await dataModels.Verification_Token.deleteOne({ token });
+      await dataModels.Verification_Token.deleteOne({ _id: tokenDoc._id });
     }
     return NextResponse.redirect(new URL('/user/login?verified=1', request.url));
   } catch (error) {
