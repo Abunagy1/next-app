@@ -11,24 +11,42 @@ import { Types } from 'mongoose';
 export async function Footer() {
   const session = await getServerSession(authOptions);
   const user = session?.user;
-  let isSubscribed = false;
-
-  if (user?.id) {
-    if (dbType === 'postgres') {
+  // let isSubscribed = false;
+  // if (user?.id) {
+  //   if (dbType === 'postgres') {
+  //     const rows = await sql`
+  //       SELECT 1 FROM subscriptions WHERE user_id = ${user.id} AND subscribed = true LIMIT 1
+  //     `;
+  //     isSubscribed = rows.length > 0;
+  //   } else {
+  //     await connectDB();
+  //     const subscription = await dataModels.Subscription.findOne({
+  //       userId: strToObjectId(user.id) as Types.ObjectId,
+  //       subscribed: true,
+  //     }).lean();
+  //     isSubscribed = !!subscription;
+  //   }
+  // }
+let isSubscribed = false;
+if (user?.id) {
+  if (dbType === 'postgres') {
+    // Only query if the id looks like a valid UUID (avoids error)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(user.id)) {
       const rows = await sql`
         SELECT 1 FROM subscriptions WHERE user_id = ${user.id} AND subscribed = true LIMIT 1
       `;
       isSubscribed = rows.length > 0;
-    } else {
-      await connectDB();
-      const subscription = await dataModels.Subscription.findOne({
-        userId: strToObjectId(user.id) as Types.ObjectId,
-        subscribed: true,
-      }).lean();
-      isSubscribed = !!subscription;
     }
+  } else {
+    await connectDB();
+    const subscription = await dataModels.Subscription.findOne({
+      userId: strToObjectId(user.id) as Types.ObjectId,
+      subscribed: true,
+    }).lean();
+    isSubscribed = !!subscription;
   }
-
+}
   return (
     
     <footer className="relative pb-5 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300">
