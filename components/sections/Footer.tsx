@@ -46,7 +46,7 @@ export async function Footer() {
           M. Nagy
         </Link>
       </div>
-      <div className="relative z-10 text-center text-sm font-medium">
+      {/* <div className="relative z-10 text-center text-sm font-medium">
         UI design taken from &nbsp;
         <Link
           aria-label="Link to Figma Community"
@@ -57,7 +57,7 @@ export async function Footer() {
         >
           Figma Community
         </Link>
-      </div>
+      </div> */}
       {/* Optional Footer Section */}
       <div className="relative z-10 text-center text-sm font-medium mt-8 border-t border-gray-200 dark:border-gray-700 pt-4">
         <p>&copy; {new Date().getFullYear()} OldNagy. All Rights Reserved.</p>
