@@ -1,7 +1,7 @@
 // scripts/reset-mongodb.ts
-// import dotenv from 'dotenv';
-// dotenv.config();
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
+// import 'dotenv/config';
 import { connectDB, mongoose } from '@/app/lib/db/db-core';
 import { seedMongoDB } from '@/app/seed/seed-mongodb';
 async function reset() {

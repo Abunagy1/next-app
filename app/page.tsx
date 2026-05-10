@@ -27,7 +27,7 @@ export default async function Page() {
                 Welcome to My Site
               </h1>
               <p className="text-lg md:text-xl mt-4 text-blue-50 max-w-2xl mx-auto md:mx-0">
-                A dynamic Next.js application with blog, dashboard, and store – built for performance and scalability.
+                A dynamic Next.js application with blog, dashboard, store, flights / Hotels and more – built for performance and scalability.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 {!session ? (
