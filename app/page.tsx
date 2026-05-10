@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { getSortedPostsData } from '@/app/lib/posts';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Plane, Building2, BookText, ShoppingBag } from 'lucide-react';
+import RotatingHeroText from '@/components/RotatingHeroText';
 export const dynamic = 'force-dynamic';
 export default async function Page() {
   //const session = await auth();
@@ -24,10 +25,25 @@ export default async function Page() {
             <div className="flex-1 text-center md:text-left">
               <AcmeLogo />
               <h1 className={`${lusitana.className} text-4xl md:text-5xl lg:text-6xl font-bold mt-6 leading-tight`}>
-                Welcome to My Site
+                Welcome to {' '}
+                  <RotatingHeroText
+                     phrases={[
+                      'Flights Reservtion System',
+                      'Awesome Blog, to Write your thoughts',
+                      'A Collective dashboard',
+                      'Selective store products',
+                      'Hotels Booking System',
+                      'GoBye Dream Travel',
+                      'Your Next Adventure',
+                      'Amazing Destinations',
+                      'Unforgettable Journeys',
+                    ]}
+                    interval={2500}
+                    className="text-blue-600"
+                  />
               </h1>
               <p className="text-lg md:text-xl mt-4 text-blue-50 max-w-2xl mx-auto md:mx-0">
-                A dynamic Next.js application with blog, dashboard, store, flights / Hotels and more – built for performance and scalability.
+                A dynamic Next.js application, built for performance and scalability.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 {!session ? (
