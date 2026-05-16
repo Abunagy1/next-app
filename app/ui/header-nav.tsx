@@ -107,6 +107,13 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { UserIcon } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 export default function HeaderNav() {
   const { data: session, status, update } = useSession();
   const pathname = usePathname();
@@ -206,8 +213,32 @@ export default function HeaderNav() {
       )}
 
       {/* Admin‑only link */}
-      {isLoggedIn && isAdmin && (
+      {/* {isLoggedIn && isAdmin && (
         <Link href="/store/edit" className={linkClasses('/store/edit')}>Edit Products</Link>
+      )} */}
+      {isLoggedIn && isAdmin && (
+        <DropdownMenu>
+          <DropdownMenuTrigger className={buttonClasses}>
+            Admin
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+          >
+            <DropdownMenuItem asChild>
+              <Link href="/store/edit">Edit Products</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/admin/add-flight">Add Flight</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/admin/add-hotel">Add Hotel</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/admin/add-airport">Add Airport</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
       {isLoggedIn && (
         <>

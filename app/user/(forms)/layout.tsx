@@ -26,6 +26,7 @@ export default async function FormsLayout({ children }: { children: React.ReactN
                 // height={490}
                 //style={{ width: 'auto', height: 'auto' }}
                 fill
+                unoptimized
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 priority   // ← only on the first one
               />
@@ -39,6 +40,7 @@ export default async function FormsLayout({ children }: { children: React.ReactN
                 // height={490}
                 //style={{ width: 'auto', height: 'auto' }}
                 fill
+                unoptimized
                 sizes="(max-width: 1024px) 100vw, 40vw"
               />
             </CarouselItem>
@@ -51,6 +53,7 @@ export default async function FormsLayout({ children }: { children: React.ReactN
                 // height={490}
                 //style={{ width: 'auto', height: 'auto' }}
                 fill
+                unoptimized
                 sizes="(max-width: 1024px) 100vw, 40vw"
               />
             </CarouselItem>

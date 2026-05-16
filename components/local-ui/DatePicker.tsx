@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import DatePickerReact from 'react-datepicker';
 import './datepicker.css';
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState, useMemo } from 'react';
 
 interface DatePickerProps {
   customInput?: React.ReactElement;
@@ -19,6 +19,30 @@ interface DatePickerProps {
   [key: string]: any;
 }
 
+// ---- MODULE‑LEVEL COMPONENT – defined only once ----
+const CustomInput = forwardRef<HTMLDivElement, any>(
+  ({ value, onClick, className }, ref) => {
+    return isDateObjValid(value) ? (
+      <div
+        className={cn('h-full w-full dark:text-white', className)}
+        ref={ref}
+        onClick={onClick}
+      >
+        {format(value, 'dd MMM yyyy')}
+      </div>
+    ) : (
+      <div
+        className={cn('h-full w-full dark:text-white', className)}
+        ref={ref}
+        onClick={onClick}
+      >
+        dd MMM yyyy
+      </div>
+    );
+  }
+);
+CustomInput.displayName = 'CustomInput';
+
 export function DatePicker({
   customInput,
   className,
@@ -29,7 +53,12 @@ export function DatePicker({
   maxDate = addYears(new Date(), 1),
   ...props
 }: DatePickerProps) {
-  
+  // ---- Memoize the custom input element so it never changes ----
+  const customInputEl = useMemo(
+    () => customInput ?? <CustomInput />,
+    [customInput]
+  );
+
   const years: number[] = [];
   for (let i = minDate.getFullYear(); i <= maxDate.getFullYear(); i++) {
     years.push(i);
@@ -46,52 +75,23 @@ export function DatePicker({
     } else {
       setDate(selected);
     }
-    setPopperOpened(false);   // ← close the popup immediately
+    setPopperOpened(false);
   };
-    // const CustomInput = forwardRef<HTMLDivElement, any>(({ value, onClick, className }, ref) => (
-    //   <div className={cn('h-full w-full dark:text-white', className)} ref={ref} onClick={onClick}>
-    //     {isDateObjValid(value) ? format(value, 'dd MMM yyyy') : 'Select date'}
-    //   </div>
-    // ));
-    // CustomInput.displayName = 'CustomInput';
-  const CustomInput = forwardRef<HTMLDivElement, any>(
-    ({ value, onClick, className }, ref) => {
-      return isDateObjValid(value) ? (
-        <div
-          className={cn('h-full w-full dark:text-white', className)}
-          ref={ref}
-          onClick={onClick}
-        >
-          {format(value, 'dd MMM yyyy')}
-        </div>
-      ) : (
-        <div
-          className={cn('h-full w-full dark:text-white', className)}
-          ref={ref}
-          onClick={onClick}
-        >
-          dd MMM yyyy
-        </div>
-      );
-    }
-  );
-  CustomInput.displayName = 'CustomInput';
-
 
   return (
     <DatePickerReact
-      customInput={customInput ? customInput : <CustomInput />}
+      customInput={customInputEl}
       renderCustomHeader={(props) => (
         <CustomHeader years={years} months={months} props={props} />
       )}
       popperClassName="dark:bg-gray-800 dark:border-gray-700"
       calendarClassName="dark:bg-gray-800"
-
+      formatWeekDay={(day) => day.substring(0, 1)}
       open={!loading && popperOpened}
       onInputClick={() => setPopperOpened(!popperOpened)}
       onClickOutside={() => setPopperOpened(false)}
       selected={isDateObjValid(date) ? new Date(date as Date) : null}
-      onChange={((selected: Date | null) => handleChange(selected))}
+      onChange={(selected: Date | null) => handleChange(selected)}
       className={className}
       minDate={minDate}
       maxDate={maxDate}
@@ -126,7 +126,8 @@ function CustomHeader({
         onChange={({ target: { value } }) =>
           props?.changeMonth(months.indexOf(value))
         }
-        className="grow-0 rounded-sm bg-white p-1 dark:bg-gray-800 dark:text-white dark:border-gray-600">
+        className="grow-0 rounded-sm bg-white p-1 dark:bg-gray-800 dark:text-white dark:border-gray-600"
+      >
         {months.map((option) => (
           <option key={option} value={option}>
             {option}
