@@ -25,7 +25,7 @@ export default async function Page() {
             <div className="flex-1 text-center md:text-left">
               <AcmeLogo />
               <h1 className={`${lusitana.className} text-4xl md:text-5xl lg:text-6xl font-bold mt-6 leading-tight`}>
-                Welcome to {' '}
+                Welcome to my site, here you can find {' '}
                   <RotatingHeroText
                      phrases={[
                       'Flights Reservtion System',
