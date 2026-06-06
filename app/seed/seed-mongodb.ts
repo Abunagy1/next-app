@@ -394,7 +394,13 @@ export async function seedMongoDB() {
   // 3. Generate and seed flights (using processed data)
   // ------------------------------------------------------------------
   console.log('   Generating flights data...');
-
+async function insertInChunks(model: any, docs: any[], chunkSize = 2000) {
+  if (!docs.length) return;
+  for (let i = 0; i < docs.length; i += chunkSize) {
+    const chunk = docs.slice(i, i + chunkSize);
+    await model.insertMany(chunk, { ordered: false });
+  }
+}
   // Step 1: Process the raw data into MongoDB-ready documents
   const airportsData = await generateAirportsDB(primaryAirportData);
   const { airplaneData: airplanesData, seatData: seatsData } = await generateAirplanesDB(primaryAirplaneData);
@@ -402,58 +408,125 @@ export async function seedMongoDB() {
   const airlineFlightPricesData = await generateAirlineFlightPricesDB(primaryAirlineData);
 
   // Step 2: Generate 365 days of flight itineraries, segments, seats, it was only 10 days before, but we want more data for testing pagination, filtering, etc.
-  const flightsData = await generateFlightsDB(
-    30,
-    airportsData,
-    airplanesData,
-    airlinesData,
-    airlineFlightPricesData
-  );
-
+  // const flightsData = await generateFlightsDB(
+  //   30,
+  //   airportsData,
+  //   airplanesData,
+  //   airlinesData,
+  //   airlineFlightPricesData
+  // );
+  // Generate and insert flights in batches
   // Flatten results
-  const flightItineraries: any[] = [];
-  const flightSegments: any[] = [];
-  const flightSeats: any[] = [];
-  for (const day of flightsData) {
-    flightItineraries.push(...day.flightItinerary);
-    flightSegments.push(...day.flightSegments);
-    flightSeats.push(...day.flightSeats);
-  }
+  // const flightItineraries: any[] = [];
+  // const flightSegments: any[] = [];
+  // const flightSeats: any[] = [];
+  // for (const day of flightsData) {
+  //   flightItineraries.push(...day.flightItinerary);
+  //   flightSegments.push(...day.flightSegments);
+  //   flightSeats.push(...day.flightSeats);
+  // }
+  // if (flightItineraries.length) {
+  //   await models.FlightItinerary.insertMany(flightItineraries);
+  //   console.log(`   Inserted ${flightItineraries.length} flight itineraries.`);
+  // }
+  // if (flightSegments.length) {
+  //   await models.FlightSegment.insertMany(flightSegments);
+  //   console.log(`   Inserted ${flightSegments.length} flight segments.`);
+  // }
+  // if (flightSeats.length) {
+  //   await models.FlightSeat.insertMany(flightSeats);
+  //   console.log(`   Inserted ${flightSeats.length} flight seats.`);
+  // }
+  // Also seed airlines, airports, airplanes (if not already inserted by the above)
+  // if (airportsData.length) {
+  //   await models.Airport.insertMany(airportsData);
+  //   console.log(`   Inserted ${airportsData.length} airports.`);
+  // }
+  // if (airlinesData.length) {
+  //   await models.Airline.insertMany(airlinesData);
+  //   console.log(`   Inserted ${airlinesData.length} airlines.`);
+  // }
+  // if (airplanesData.length) {
+  //   await models.Airplane.insertMany(airplanesData);
+  //   console.log(`   Inserted ${airplanesData.length} airplanes.`);
+  // }
+  // if (airlineFlightPricesData.length) {
+  //   await models.AirlineFlightPrice.insertMany(airlineFlightPricesData);
+  //   console.log(`   Inserted ${airlineFlightPricesData.length} airline flight prices.`);
+  // }
+  // if (seatsData?.length) {
+  //   await models.Seat.insertMany(seatsData);
+  //   console.log(`   Inserted ${seatsData.length} seats.`);
+  // }
+// ===== Generate and insert flights in batches =====
+const DAYS_TO_GENERATE = 14;
+const BATCH_SIZE_DAYS = 2;
+let totalItineraries = 0;
+let totalSegments = 0;
+let totalSeats = 0;
 
+console.log(` Generating flights data in batches of ${BATCH_SIZE_DAYS} days...`);
+
+// ✅ First, insert static data ONCE (airports, airlines, airplanes, prices)
+if (airportsData.length) {
+  await models.Airport.insertMany(airportsData);
+  //await insertInChunks(models.Airport, airportsData);
+  console.log(` Inserted ${airportsData.length} airports.`);
+}
+if (airlinesData.length) {
+  await models.Airline.insertMany(airlinesData);
+  //await insertInChunks(models.Airline, airlinesData);
+  console.log(` Inserted ${airlinesData.length} airlines.`);
+}
+if (airplanesData.length) {
+  await models.Airplane.insertMany(airplanesData);
+  //await insertInChunks(models.Airplane, airplanesData);
+  console.log(` Inserted ${airplanesData.length} airplanes.`);
+}
+if (airlineFlightPricesData.length) {
+  await models.AirlineFlightPrice.insertMany(airlineFlightPricesData);
+  //await insertInChunks(models.AirlineFlightPrice, airlineFlightPricesData);
+  console.log(` Inserted ${airlineFlightPricesData.length} airline flight prices.`);
+}
+if (seatsData?.length) {
+  await models.Seat.insertMany(seatsData);
+  //await insertInChunks(models.Seat, seatsData);
+  console.log(` Inserted ${seatsData.length} seats.`);
+}
+
+// Now generate flights in batches
+for (let startDay = 0; startDay < DAYS_TO_GENERATE; startDay += BATCH_SIZE_DAYS) {
+  const daysInBatch = Math.min(BATCH_SIZE_DAYS, DAYS_TO_GENERATE - startDay);
+  console.log(`   Batch ${startDay / BATCH_SIZE_DAYS + 1}: generating days ${startDay + 1} to ${startDay + daysInBatch}...`);
+  
+  // Generate only this batch
+  const flightsData = await generateFlightsDB(daysInBatch, airportsData, airplanesData, airlinesData, airlineFlightPricesData);
+  
+  // Flatten batch results
+  const flightItineraries = flightsData.flatMap((day: any) => day.flightItinerary || []);
+  const flightSegments = flightsData.flatMap((day: any) => day.flightSegments || []);
+  const flightSeats = flightsData.flatMap((day: any) => day.flightSeats || []);
+  
+  // Insert batch
   if (flightItineraries.length) {
-    await models.FlightItinerary.insertMany(flightItineraries);
-    console.log(`   Inserted ${flightItineraries.length} flight itineraries.`);
+    await insertInChunks(models.FlightItinerary, flightItineraries);
+    totalItineraries += flightItineraries.length;
+    console.log(`      Inserted ${flightItineraries.length} itineraries`);
   }
   if (flightSegments.length) {
-    await models.FlightSegment.insertMany(flightSegments);
-    console.log(`   Inserted ${flightSegments.length} flight segments.`);
+    await insertInChunks(models.FlightSegment, flightSegments);
+    totalSegments += flightSegments.length;
+    console.log(`      Inserted ${flightSegments.length} segments`);
   }
   if (flightSeats.length) {
-    await models.FlightSeat.insertMany(flightSeats);
-    console.log(`   Inserted ${flightSeats.length} flight seats.`);
+    await insertInChunks(models.FlightSeat, flightSeats);
+    totalSeats += flightSeats.length;
+    console.log(`      Inserted ${flightSeats.length} seats`);
   }
-
-  // Also seed airlines, airports, airplanes (if not already inserted by the above)
-  if (airportsData.length) {
-    await models.Airport.insertMany(airportsData);
-    console.log(`   Inserted ${airportsData.length} airports.`);
-  }
-  if (airlinesData.length) {
-    await models.Airline.insertMany(airlinesData);
-    console.log(`   Inserted ${airlinesData.length} airlines.`);
-  }
-  if (airplanesData.length) {
-    await models.Airplane.insertMany(airplanesData);
-    console.log(`   Inserted ${airplanesData.length} airplanes.`);
-  }
-  if (airlineFlightPricesData.length) {
-    await models.AirlineFlightPrice.insertMany(airlineFlightPricesData);
-    console.log(`   Inserted ${airlineFlightPricesData.length} airline flight prices.`);
-  }
-  if (seatsData?.length) {
-    await models.Seat.insertMany(seatsData);
-    console.log(`   Inserted ${seatsData.length} seats.`);
-  }
+  // console.log(`Itineraries: ${flightItineraries.length}, Segments: ${flightSegments.length}, Seats: ${flightSeats.length}`);
+  // Optional: force garbage collection if --expose-gc flag is used
+  if (global.gc) global.gc();
+}
 
   // ------------------------------------------------------------------
   // 4. Generate and seed hotels
@@ -468,6 +541,5 @@ export async function seedMongoDB() {
     await models.HotelRoom.insertMany(hotelsData.hotelRoom);
     console.log(`   Inserted ${hotelsData.hotelRoom.length} hotel rooms.`);
   }
-
   console.log('✅ MongoDB seeding complete.');
 }
