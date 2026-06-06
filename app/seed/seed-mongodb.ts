@@ -401,9 +401,9 @@ export async function seedMongoDB() {
   const airlinesData = await generateAirlinesDB(primaryAirlineData);
   const airlineFlightPricesData = await generateAirlineFlightPricesDB(primaryAirlineData);
 
-  // Step 2: Generate 10 days of flight itineraries, segments, seats
+  // Step 2: Generate 365 days of flight itineraries, segments, seats, it was only 10 days before, but we want more data for testing pagination, filtering, etc.
   const flightsData = await generateFlightsDB(
-    10,
+    30,
     airportsData,
     airplanesData,
     airlinesData,

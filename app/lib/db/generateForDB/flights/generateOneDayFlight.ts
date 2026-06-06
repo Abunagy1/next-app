@@ -1,7 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { addDays, addMinutes, subMinutes } from 'date-fns';
 import { lerp, normalize } from '../../../utils';
-
+// Now find all places where expireAt is set (there are three:
+// for the itinerary, segments, and seats). We want expireAt to be a date far in the future, e.g., 30 days after departure.
 // ==================== Full Interfaces (matching original data) ====================
 interface Airline {
   _id: string;
@@ -211,7 +212,8 @@ export default function generateOneDayFlight(
           _id: new ObjectId().toString(),
           airplaneId: choosingAirplane._id,
           reservation: { type: null, expiresAt: 0, for: null },
-          expireAt: subMinutes(departureTime, 30),
+          // expireAt: subMinutes(departureTime, 30),
+          expireAt: addDays(departureTime, 30), // Set expireAt to 30 days after departure
         }));
 
         const departureAirportId = route.departureAirportCode;
@@ -348,7 +350,8 @@ export default function generateOneDayFlight(
             ...segment,
             flightNumber: `${flightCode}-${segmentIds.indexOf(segment._id) + 1}`,
             date: departureTime,
-            expireAt: subMinutes(departureTime, 30),
+            // expireAt: subMinutes(departureTime, 30),
+            expireAt: addDays(departureTime, 30), // Set expireAt to 30 days after departure
           }))
         );
 
@@ -364,7 +367,8 @@ export default function generateOneDayFlight(
           layovers,
           baggageAllowance: generateBaggageAllowance(airline),
           status: 'scheduled',
-          expireAt: subMinutes(departureTime, 30),
+          expireAt: addDays(departureTime, 30),
+          
         });
 
         flightSeats.push(...baseSegmentSeats, ...segment1Seats, ...segment2Seats);
@@ -432,7 +436,7 @@ function createSegment({
     fareDetails: generateFareDetails(route, airlineFlightPrices, { _id: airlineId }, discount),
     baggageAllowance: generateBaggageAllowance(airline),
     status: 'scheduled',
-    expireAt: subMinutes(departureTime, 30),
+    expireAt: addDays(departureTime, 30),
   };
 }
 

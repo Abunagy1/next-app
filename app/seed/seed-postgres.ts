@@ -1085,8 +1085,8 @@ async function seedFlightsPostgres() {
   const { airplaneData: airplanes, seatData: seats } = await generateAirplanesDB(primaryAirplaneData);
   const airlines = await generateAirlinesDB(primaryAirlineData);
   const airlineFlightPrices = await generateAirlineFlightPricesDB(primaryAirlineData);
-
-  const flightsData = await generateFlightsDB(10, airports, airplanes, airlines, airlineFlightPrices);
+// Step 2: Generate 365 days of flight itineraries, segments, seats, it was only 10 days before, but we want more data for testing pagination, filtering, etc.
+  const flightsData = await generateFlightsDB(30, airports, airplanes, airlines, airlineFlightPrices);
 
   const flightItineraries: any[] = [];
   const flightSegments: any[] = [];

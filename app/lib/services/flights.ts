@@ -68,11 +68,12 @@ export async function getFlights(
     filters = {},
   } = params;
   const zoneOffset = getTimezoneOffset(metaData.timeZone, departureDate);
+  const oneDayInMillis = 24 * 60 * 60 * 1000;
   const filterAirlines = filters?.airlines || [];
   const filterRatings = filters?.rates || [];
   const filterPriceRange = filters?.priceRange || [];
   const filterDepartureTime = filters?.departureTime || [];
-  const oneDayInMillis = 24 * 60 * 60 * 1000;
+
   let flightResults: any[] = [];
   // ===================== POSTGRES =====================
   if (dbType === 'postgres') {
@@ -92,7 +93,16 @@ export async function getFlights(
     const endTimestamp = endOfDay(departureDate).getTime() - zoneOffset;
     const startSeconds = startTimestamp / 1000;
     const endSeconds = endTimestamp / 1000;
+    // console.log('Search params:', {
+    //   departureAirportCode,
+    //   arrivalAirportCode,
+    //   departureDate: departureDate.toISOString(),
+    //   startTimestamp,
+    //   endTimestamp,
+    //   zoneOffset,
+    // });
     query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
+    console.log('Date filter disabled for testing');
     if (filterAirlines.length) {
       query = sql`${query} AND fi.carrier_in_charge = ANY(${filterAirlines})`;
     }
@@ -101,6 +111,10 @@ export async function getFlights(
       query = sql`${query} AND EXTRACT(EPOCH FROM fi.date::time) * 1000 BETWEEN ${minTime} AND ${maxTime}`;
     }
     const rows = await query;
+    // console.log(`Found ${rows.length} flights for ${departureAirportCode} -> ${arrivalAirportCode}`);
+    // if (rows.length > 0) {
+    //   console.log('First flight:', rows[0].flight_code, rows[0].date);
+    // }
     flightResults = await Promise.all(
       rows.map(async (row: any) => {
         // fetch segments
