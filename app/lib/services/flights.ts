@@ -197,13 +197,15 @@ export async function getFlights(
       })
     );
   } else {
-    // ===================== MONGODB =====================
+    // ===================== MONGODB (with population) =====================
+    const startOfDayUTC = startOfDay(departureDate);
+    const endOfDayUTC = endOfDay(departureDate);
     const filter: any = {
       departureAirportId: departureAirportCode,
       arrivalAirportId: arrivalAirportCode,
       date: {
-        $gte: startOfDay(departureDate).getTime() - zoneOffset,
-        $lte: endOfDay(departureDate).getTime() - zoneOffset,
+        $gte: startOfDayUTC.getTime() + zoneOffsetMs,
+        $lte: endOfDayUTC.getTime() + zoneOffsetMs,
       },
       status: 'scheduled',
       expireAt: { $gte: new Date() },
@@ -211,13 +213,15 @@ export async function getFlights(
     if (filterAirlines.length) filter.carrierInCharge = { $in: filterAirlines };
     if (filterDepartureTime.length) {
       filter.date = {
-        $gte: startOfDay(departureDate).getTime() - zoneOffset + filterDepartureTime[0],
-        $lte: startOfDay(departureDate).getTime() - zoneOffset - (oneDayInMillis - filterDepartureTime[1]),
+        $gte: startOfDayUTC.getTime() + zoneOffsetMs + filterDepartureTime[0],
+        $lte: startOfDayUTC.getTime() + zoneOffsetMs - (oneDayInMillis - filterDepartureTime[1]),
       };
     }
-    flightResults = await getManyDocs('FlightItinerary', filter, ['flights']);
+    // ✅ Populate segmentIds to get full segment objects
+    flightResults = await dataModels.FlightItinerary.find(filter)
+      .populate('segmentIds')      // 👈 CRITICAL
+      .lean();
   }
-  
   // Post-process: filter by price, rating, seat availability
   const processedFlights: any[] = [];
   for (const flight of flightResults) {
@@ -287,8 +291,9 @@ export async function getFlights(
       availableSeatsCount: availableSeatsCountArray,
     });
   }
-
-  return processedFlights;
+  // At the end of getFlights, just before return
+  return processedFlights.map(flight => JSON.parse(JSON.stringify(flight)));
+  //return processedFlights;
 }
 
 
