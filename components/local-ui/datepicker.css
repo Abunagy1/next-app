@@ -38,7 +38,6 @@
   border-color: #8dd3bb;
   font-family: "Montserrat", sans-serif;
   font-size: 0.7rem;
-  /* reduced from 0.75rem */
   font-weight: 600;
 }
 
@@ -222,7 +221,6 @@ h2.react-datepicker__current-month {
 
 .react-datepicker__month {
   padding: 0.2rem;
-  /* reduced from 0.4rem */
   text-align: center;
   background-color: #fff;
   border-bottom-left-radius: 0.125rem;
@@ -374,26 +372,38 @@ h2.react-datepicker__current-month {
   background-color: rgb(28.75, 93.22, 143.75);
 }
 
-.react-datepicker__day-names {
-  white-space: nowrap;
-  margin-bottom: -8px;
-}
 
 .react-datepicker__week {
   white-space: nowrap;
 }
 
-.react-datepicker__day-name,
+/* --- Weekday name (single letter) --- */
+/* Ensure weekdays container uses flex */
+.react-datepicker__day-names {
+  display: flex !important;
+  justify-content: space-around !important;
+  width: 100% !important;
+  margin: 0.5rem 0 !important;
+}
+
+/* Each weekday cell */
+.react-datepicker__day-name {
+  display: inline-block !important;
+  width: 2rem !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+}
+/* Day cell styles – keep original but do not override the width of day-name */
 .react-datepicker__day,
 .react-datepicker__time-name {
   color: #000;
   display: inline-block;
   width: 1.5rem;
-  /* reduced from 1.7rem */
   line-height: 1.5rem;
   text-align: center;
   margin: 0.1rem;
-  /* reduced from 0.166rem */
   font-size: 0.7rem;
 }
 
@@ -596,6 +606,7 @@ h2.react-datepicker__current-month {
   background-color: #f0f0f0;
   color: #000;
 }
+
 .react-datepicker__day--disabled,
 .react-datepicker__month-text--disabled,
 .react-datepicker__quarter-text--disabled,
@@ -930,3 +941,4 @@ html.dark .react-datepicker__time-name {
   background-color: #1f2937;
   padding: 0.5rem;
 }
+
