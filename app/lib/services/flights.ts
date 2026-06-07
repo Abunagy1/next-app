@@ -98,19 +98,18 @@ export async function getFlights(
     // const endSeconds = endTimestamp / 1000;
     // query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
     // Use UTC date range directly (departureDate is already UTC midnight)
-    const dateStr = departureDate.toISOString().split('T')[0];
-    const startDate = new Date(`${dateStr}T00:00:00.000Z`);
-    const endDate = new Date(`${dateStr}T23:59:59.999Z`);
-    const startSeconds = startDate.getTime() / 1000;
-    const endSeconds = endDate.getTime() / 1000;
-    console.log('Search date (user selected):', departureDate.toISOString());
-    console.log('Date range UTC start:', startDate.toISOString());
-    console.log('Date range UTC end:', endDate.toISOString());
-    console.log('Query SQL:', query.string, 'Values:', query.values);
-    
-    query = sql`${query} AND DATE(fi.date AT TIME ZONE 'UTC') = ${dateStr}::date`;
+    // const dateStr = departureDate.toISOString().split('T')[0];
+    // const startDate = new Date(`${dateStr}T00:00:00.000Z`);
+    // const endDate = new Date(`${dateStr}T23:59:59.999Z`);
+    // const startSeconds = startDate.getTime() / 1000;
+    // const endSeconds = endDate.getTime() / 1000;
     // query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
-
+    // Use UTC day range – matches MongoDB behavior exactly
+    const startOfDayUTC = new Date(Date.UTC(departureDate.getUTCFullYear(), departureDate.getUTCMonth(), departureDate.getUTCDate(), 0, 0, 0));
+    const endOfDayUTC = new Date(Date.UTC(departureDate.getUTCFullYear(), departureDate.getUTCMonth(), departureDate.getUTCDate(), 23, 59, 59, 999));
+    const startSeconds = startOfDayUTC.getTime() / 1000;
+    const endSeconds = endOfDayUTC.getTime() / 1000;
+    query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
     if (filterAirlines.length) {
       query = sql`${query} AND fi.carrier_in_charge = ANY(${filterAirlines})`;
     }
