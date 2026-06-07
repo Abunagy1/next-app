@@ -34,26 +34,41 @@ export async function GET() {
   try {
     if (dbType === 'postgres') {
       // PostgreSQL: get min and max expire_at of future itineraries
-      const result = await sql<{ min_expire: Date | null; max_expire: Date | null }[]>`
-        SELECT MIN(expire_at) AS min_expire, MAX(expire_at) AS max_expire
+      // const result = await sql<{ min_expire: Date | null; max_expire: Date | null }[]>`
+      //   SELECT MIN(expire_at) AS min_expire, MAX(expire_at) AS max_expire
+      //   FROM flight_itineraries
+      //   WHERE expire_at > NOW()
+      // `;
+      const result = await sql`
+        SELECT MIN(date) as min_date, MAX(date) as max_date
         FROM flight_itineraries
-        WHERE expire_at > NOW()
+        WHERE date > NOW()
       `;
+      const from = result[0]?.min_date ? new Date(result[0].min_date).getTime() : Date.now();
+      const to   = result[0]?.max_date ? new Date(result[0].max_date).getTime() : Date.now();
       const row = result[0];
-      const from = row?.min_expire ? row.min_expire.getTime() : Date.now();
-      const to = row?.max_expire ? row.max_expire.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+      // const from = row?.min_expire ? row.min_expire.getTime() : Date.now();
+      // const to = row?.max_expire ? row.max_expire.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
       return NextResponse.json({ success: true, data: { from, to } });
     } else {
       // MongoDB
       await connectDB();
-      const first = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
-        .sort({ expireAt: 1 })
+      // const first = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
+      //   .sort({ expireAt: 1 })
+      //   .lean();
+      // const last = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
+      //   .sort({ expireAt: -1 })
+      //   .lean();
+      // const from = first ? first.expireAt.getTime() : Date.now();
+      // const to = last ? last.expireAt.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+      const first = await dataModels.FlightItinerary.findOne({ date: { $gte: new Date() } })
+        .sort({ date: 1 })
         .lean();
-      const last = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
-        .sort({ expireAt: -1 })
+      const last = await dataModels.FlightItinerary.findOne({ date: { $gte: new Date() } })
+        .sort({ date: -1 })
         .lean();
-      const from = first ? first.expireAt.getTime() : Date.now();
-      const to = last ? last.expireAt.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+      const from = first ? first.date.getTime() : Date.now();
+      const to   = last  ? last.date.getTime()  : Date.now();
       return NextResponse.json({ success: true, data: { from, to } });
     }
   } catch (error) {

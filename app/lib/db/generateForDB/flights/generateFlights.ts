@@ -63,7 +63,8 @@ export async function generateFlightsDB(
 ): Promise<GeneratedFlightDay[]> {
   const flightData: GeneratedFlightDay[] = [];
   // const startDate = subDays(new Date(), 1); // Start from yesterday to have some past flights for testing 
-  const startDate = addDays(new Date(), 1); // Start from tomorrow to ensure all flights are in the future
+  // const startDate = addDays(new Date(), 1); // Start from tomorrow to ensure all flights are in the future
+  const startDate = new Date(); // today
   for (let i = 0; i < howManyDays; i++) {
     const currentDate = addDays(startDate, i);
     const oneDayFlight = generateOneDayFlight(

@@ -68,6 +68,8 @@ export async function getFlights(
     filters = {},
   } = params;
   const zoneOffset = getTimezoneOffset(metaData.timeZone, departureDate);
+  const zoneOffsetMs = getTimezoneOffset(metaData.timeZone, departureDate) * 60 * 1000;
+
   const oneDayInMillis = 24 * 60 * 60 * 1000;
   const filterAirlines = filters?.airlines || [];
   const filterRatings = filters?.rates || [];
@@ -89,20 +91,26 @@ export async function getFlights(
         AND fi.status = 'scheduled'
         AND fi.expire_at > NOW()
     `;
-    const startTimestamp = startOfDay(departureDate).getTime() - zoneOffset;
-    const endTimestamp = endOfDay(departureDate).getTime() - zoneOffset;
-    const startSeconds = startTimestamp / 1000;
-    const endSeconds = endTimestamp / 1000;
-    // console.log('Search params:', {
-    //   departureAirportCode,
-    //   arrivalAirportCode,
-    //   departureDate: departureDate.toISOString(),
-    //   startTimestamp,
-    //   endTimestamp,
-    //   zoneOffset,
-    // });
-    query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
-    console.log('Date filter disabled for testing');
+    // inside PostgreSQL branch, after building the initial query
+    // const startTimestamp = startOfDay(departureDate).getTime() - zoneOffsetMs;
+    // const endTimestamp = endOfDay(departureDate).getTime() - zoneOffsetMs;
+    // const startSeconds = startTimestamp / 1000;
+    // const endSeconds = endTimestamp / 1000;
+    // query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
+    // Use UTC date range directly (departureDate is already UTC midnight)
+    const dateStr = departureDate.toISOString().split('T')[0];
+    const startDate = new Date(`${dateStr}T00:00:00.000Z`);
+    const endDate = new Date(`${dateStr}T23:59:59.999Z`);
+    const startSeconds = startDate.getTime() / 1000;
+    const endSeconds = endDate.getTime() / 1000;
+    console.log('Search date (user selected):', departureDate.toISOString());
+    console.log('Date range UTC start:', startDate.toISOString());
+    console.log('Date range UTC end:', endDate.toISOString());
+    console.log('Query SQL:', query.string, 'Values:', query.values);
+    
+    query = sql`${query} AND DATE(fi.date AT TIME ZONE 'UTC') = ${dateStr}::date`;
+    // query = sql`${query} AND fi.date BETWEEN to_timestamp(${startSeconds}) AND to_timestamp(${endSeconds})`;
+
     if (filterAirlines.length) {
       query = sql`${query} AND fi.carrier_in_charge = ANY(${filterAirlines})`;
     }
@@ -111,10 +119,10 @@ export async function getFlights(
       query = sql`${query} AND EXTRACT(EPOCH FROM fi.date::time) * 1000 BETWEEN ${minTime} AND ${maxTime}`;
     }
     const rows = await query;
-    // console.log(`Found ${rows.length} flights for ${departureAirportCode} -> ${arrivalAirportCode}`);
-    // if (rows.length > 0) {
-    //   console.log('First flight:', rows[0].flight_code, rows[0].date);
-    // }
+    console.log(`Found ${rows.length} flights for ${departureAirportCode} -> ${arrivalAirportCode}`);
+    if (rows.length > 0) {
+      console.log('First flight:', rows[0].flight_code, rows[0].date);
+    }
     flightResults = await Promise.all(
       rows.map(async (row: any) => {
         // fetch segments
@@ -526,26 +534,54 @@ export async function getFlight(flightCode: string, date: Date): Promise<any> {
 }
 
 // ---------- Get available flight date range ----------
+// export async function getAvailableFlightDateRange(): Promise<{ success: boolean; message: string; data?: { from: number; to: number } }> {
+//   try {
+//     if (dbType === 'postgres') {
+//       const rows = await sql`
+//         SELECT MIN(expire_at) as min_expire, MAX(expire_at) as max_expire
+//         FROM flight_itineraries
+//         WHERE expire_at > NOW()
+//       `;
+//       const from = rows[0]?.min_expire ? new Date(rows[0].min_expire).getTime() : Date.now();
+//       const to = rows[0]?.max_expire ? new Date(rows[0].max_expire).getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+//       return { success: true, message: 'Success', data: { from, to } };
+//     } else {
+//       const first = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
+//         .sort({ expireAt: 1 })
+//         .lean();
+//       const last = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
+//         .sort({ expireAt: -1 })
+//         .lean();
+//       const from = first ? first.expireAt.getTime() : Date.now();
+//       const to = last ? last.expireAt.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+//       return { success: true, message: 'Success', data: { from, to } };
+//     }
+//   } catch (e) {
+//     console.error(e);
+//     return { success: false, message: 'Failed to get flight date range' };
+//   }
+// }
 export async function getAvailableFlightDateRange(): Promise<{ success: boolean; message: string; data?: { from: number; to: number } }> {
   try {
     if (dbType === 'postgres') {
       const rows = await sql`
-        SELECT MIN(expire_at) as min_expire, MAX(expire_at) as max_expire
+        SELECT MIN(date) AS min_date, MAX(date) AS max_date
         FROM flight_itineraries
-        WHERE expire_at > NOW()
+        WHERE date > NOW()
       `;
-      const from = rows[0]?.min_expire ? new Date(rows[0].min_expire).getTime() : Date.now();
-      const to = rows[0]?.max_expire ? new Date(rows[0].max_expire).getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+      const row = rows[0];
+      const from = row?.min_date ? new Date(row.min_date).getTime() : Date.now();
+      const to = row?.max_date ? new Date(row.max_date).getTime() : Date.now();
       return { success: true, message: 'Success', data: { from, to } };
     } else {
-      const first = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
-        .sort({ expireAt: 1 })
+      const first = await dataModels.FlightItinerary.findOne({ date: { $gte: new Date() } })
+        .sort({ date: 1 })
         .lean();
-      const last = await dataModels.FlightItinerary.findOne({ expireAt: { $gte: new Date() } })
-        .sort({ expireAt: -1 })
+      const last = await dataModels.FlightItinerary.findOne({ date: { $gte: new Date() } })
+        .sort({ date: -1 })
         .lean();
-      const from = first ? first.expireAt.getTime() : Date.now();
-      const to = last ? last.expireAt.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000;
+      const from = first ? first.date.getTime() : Date.now();
+      const to = last ? last.date.getTime() : Date.now();
       return { success: true, message: 'Success', data: { from, to } };
     }
   } catch (e) {
@@ -553,7 +589,6 @@ export async function getAvailableFlightDateRange(): Promise<{ success: boolean;
     return { success: false, message: 'Failed to get flight date range' };
   }
 }
-
 // ---------- Get all flight bookings for a user ----------
 // export async function getAllFlightBookings(userId: string, revalidate = 600): Promise<any[]> {
 //   if (!userId) throw new Error('User id is required');

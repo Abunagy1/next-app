@@ -529,8 +529,8 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
               <DatePicker
                 date={departureDateObj}
                 loading={isLoadingDateRange || isFormLoading}
-                minDate={new Date(+flightFormData.availableFlightDateRange.from)}
-                maxDate={new Date(+flightFormData.availableFlightDateRange.to)}
+                minDate={new Date(flightFormData.availableFlightDateRange.from)} // Set minDate to the available flight date range start, it ws +flightFormData.availableFlightDateRange.from before but it can cause issues if the user selects a departure date and then changes the trip type to round trip, making the return date invalid because the departure date is before the available flight date range start
+                maxDate={new Date(flightFormData.availableFlightDateRange.to)} // Set maxDate to the available flight date range end, it was +flightFormData.availableFlightDateRange.to before but it can cause issues if the user selects a departure date and then changes the trip type to round trip, making the return date invalid because the departure date is after the available flight date range end
                 setDate={(date) => {
                   let d: string | undefined = undefined;
                   if (date && isDateObjValid(date)) {
