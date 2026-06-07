@@ -75,7 +75,7 @@ export async function getFlights(
   const filterRatings = filters?.rates || [];
   const filterPriceRange = filters?.priceRange || [];
   const filterDepartureTime = filters?.departureTime || [];
-
+  let seatCountMap: Map<string, number> | null = null;  // 👈 declared outside
   let flightResults: any[] = [];
   // ===================== POSTGRES =====================
   if (dbType === 'postgres') {
@@ -197,7 +197,6 @@ export async function getFlights(
       })
     );
   } else {
-    // ===================== MONGODB (with population) =====================
     const startOfDayUTC = startOfDay(departureDate);
     const endOfDayUTC = endOfDay(departureDate);
     const filter: any = {
@@ -217,11 +216,32 @@ export async function getFlights(
         $lte: startOfDayUTC.getTime() + zoneOffsetMs - (oneDayInMillis - filterDepartureTime[1]),
       };
     }
-    // ✅ Populate segmentIds to get full segment objects
+
     flightResults = await dataModels.FlightItinerary.find(filter)
-      .populate('segmentIds')      // 👈 CRITICAL
+      .populate('segmentIds')
+      .limit(100)
       .lean();
+
+    // ---------- BATCH SEAT AVAILABILITY ----------
+    const allSegmentIds: string[] = [];
+    flightResults.forEach(flight => {
+      flight.segmentIds?.forEach((seg: any) => {
+        const segId = seg._id?.toString();
+        if (segId) allSegmentIds.push(segId);
+      });
+    });
+    if (allSegmentIds.length) {
+      const seats = await dataModels.FlightSeat.aggregate([
+        { $match: { segmentId: { $in: allSegmentIds.map(id => strToObjectId(id)) }, class: flightClass } },
+        { $match: { $or: [{ 'reservation.type': null }, { 'reservation.type': 'temporary', 'reservation.expiresAt': { $lt: Date.now() } }] } },
+        { $group: { _id: '$segmentId', availableSeats: { $sum: 1 } } }
+      ]);
+      seatCountMap = new Map(seats.map(s => [s._id.toString(), s.availableSeats]));
+    } else {
+      seatCountMap = new Map();
+    }
   }
+
   // Post-process: filter by price, rating, seat availability
   const processedFlights: any[] = [];
   for (const flight of flightResults) {
@@ -270,15 +290,32 @@ export async function getFlights(
     if (!flight.segmentIds || flight.segmentIds.length === 0) continue;
 
     // seat availability
-    const availableSeatsCountArray: { segmentId: string; availableSeats: number }[] = [];
-    for (const segment of flight.segmentIds) {
-      const segId = dbType === 'postgres' ? segment.id : segment._id;
-      if (!segId) continue;
-      const seats = await getAvailableSeats(segId, flightClass);
-      availableSeatsCountArray.push({ segmentId: segId, availableSeats: seats.length });
+    // const availableSeatsCountArray: { segmentId: string; availableSeats: number }[] = [];
+    // for (const segment of flight.segmentIds) {
+    //   const segId = dbType === 'postgres' ? segment.id : segment._id;
+    //   if (!segId) continue;
+    //   const seats = await getAvailableSeats(segId, flightClass);
+    //   availableSeatsCountArray.push({ segmentId: segId, availableSeats: seats.length });
+    // }
+    // if (availableSeatsCountArray.every(s => s.availableSeats === 0)) continue;
+    // ---------- Seat availability (branch‑specific) ----------
+    let availableSeatsCountArray: { segmentId: string; availableSeats: number }[];
+    if (dbType === 'postgres') {
+      availableSeatsCountArray = [];
+      for (const segment of flight.segmentIds) {
+        const segId = segment.id;
+        if (!segId) continue;
+        const seats = await getAvailableSeats(segId, flightClass);
+        availableSeatsCountArray.push({ segmentId: segId, availableSeats: seats.length });
+      }
+    } else {
+      // Use the pre‑computed map for MongoDB
+      availableSeatsCountArray = flight.segmentIds.map((segment: any) => ({
+        segmentId: segment._id.toString(),
+        availableSeats: seatCountMap?.get(segment._id.toString()) || 0
+      }));
     }
     if (availableSeatsCountArray.every(s => s.availableSeats === 0)) continue;
-
     const isBookmarked = bookmarkedFlights.some(
       (b) => b.flightId?._id?.toString() === (flight._id?.toString() || flight.id?.toString())
     );
@@ -292,10 +329,9 @@ export async function getFlights(
     });
   }
   // At the end of getFlights, just before return
+  // Serialize to plain objects (fixes the React serialization errors)
   return processedFlights.map(flight => JSON.parse(JSON.stringify(flight)));
-  //return processedFlights;
 }
-
 
 // // ---------- Helper: Get flights (main search) ----------
 // export async function getFlights(

@@ -49,7 +49,7 @@ export function FlightResultCard({ data, searchState, metaData }: FlightResultCa
           height={300}
           className="h-full w-full rounded-l-[12px] object-contain p-5 max-md:rounded-r-[8px] dark:bg-gray-700"
           src={airlinesLogos[data?.carrierInCharge?._id as keyof typeof airlinesLogos] || airlinesLogos.EK}
-          alt={data?.carrierInCharge?._id}
+          alt={`${data?.carrierInCharge?._id} airline logo`}
           priority
         />
       </div>

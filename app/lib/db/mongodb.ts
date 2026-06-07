@@ -23,19 +23,21 @@ export function getMongoURI(): string {
 const globalForMongoose = global as typeof globalThis & {
   _mongooseConn?: Promise<typeof mongoose>;
 };
-
+let isConnecting = false;
 export const connectDB = async () => {
-  // If already connected, do nothing
   if (mongoose.connection.readyState >= 1) return;
-
-  // Use the globally cached connection promise in development
-  if (!globalForMongoose._mongooseConn) {
-    const uri = getMongoURI();
-    console.log(`[mongodb] Connecting to ${env} database`);
-    globalForMongoose._mongooseConn = mongoose.connect(uri);
+  if (isConnecting) return;
+  isConnecting = true;
+  try {
+    if (!globalForMongoose._mongooseConn) {
+      const uri = getMongoURI();
+      console.log(`[mongodb] Connecting to ${env} database`);
+      globalForMongoose._mongooseConn = mongoose.connect(uri);
+    }
+    await globalForMongoose._mongooseConn;
+  } finally {
+    isConnecting = false;
   }
-  
-  await globalForMongoose._mongooseConn;
 };
 
 export { mongoose };
